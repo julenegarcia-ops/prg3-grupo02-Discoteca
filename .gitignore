@@ -1,0 +1,17 @@
+# Compilados de la app de asistencia
+herramientas/asistencia/out/
+
+# Java / IDEs
+*.class
+bin/
+target/
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Copias de seguridad locales de la app de asistencia
+IngasPutoAmo/
+.IngasPutoAmo/
