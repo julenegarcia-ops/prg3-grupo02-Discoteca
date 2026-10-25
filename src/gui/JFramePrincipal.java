@@ -55,11 +55,20 @@ public class JFramePrincipal extends JFrame {
         btnEventos.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Gestión de eventos");
         });
-
+        
+        /*
+        btnEventos.addActionListener(e -> {
+            JFrameEventos ventana = new JFrameEventos();
+            ventana.setVisible(true);
+        });*/
+        
         btnEntradas.addActionListener(e -> {JOptionPane.showMessageDialog(this, "Venta de entradas");
         });
 
-        btnInventario.addActionListener(e -> {  JOptionPane.showMessageDialog(this, "Gestión de inventario");
+        btnInventario.addActionListener(e -> {  
+        	JFrameInventario ventana = new JFrameInventario();
+        	ventana.setVisible(true);
+        	
         });
 
         btnEmpleados.addActionListener(e -> { JOptionPane.showMessageDialog(this,  "Gestión de empleados y turnos");
