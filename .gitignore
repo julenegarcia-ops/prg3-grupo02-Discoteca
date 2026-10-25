@@ -15,3 +15,28 @@ target/
 # Copias de seguridad locales de la app de asistencia
 IngasPutoAmo/
 .IngasPutoAmo/
+
+# Código compilado
+*.class
+/bin/
+
+# Eclipse
+.metadata/
+.settings/
+.project
+.classpath
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Ficheros de SQLite
+*.db
+*.db-journal
+
+# Ficheros del sistema operativo
+.DS_Store
+Thumbs.db
