@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -40,6 +41,13 @@ public class JFrameInventario extends JFrame{
 	private JLabel lblSeleccion;
 	
 	private JButton btnActualizarStock;
+	
+	// Botones para controlar la simulación del Thread que simula el consumo de productos durante los eventos
+	private JButton btnIniciar;
+	private JButton btnParar;
+
+	// Thread que simulará el consumo de los productos
+	private HiloConsumo hiloConsumo;
 
 	public JFrameInventario() {
 		
@@ -75,7 +83,7 @@ public class JFrameInventario extends JFrame{
 		Producto p20 = new Producto(20, "Zumo de piña", "Otros", 3.0, 5, 10);
 		Producto p21 = new Producto(21, "Tónica", "Refrescos", 2.5, 25, 10);
 		Producto p22 = new Producto(22, "Hielo", "Otros", 1.0, 40, 15);
-        //Fin generado por IA
+        
 		
 		// Creo la lista de productos
 		productos = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5,
@@ -84,7 +92,7 @@ public class JFrameInventario extends JFrame{
 		        p16, p17, p18, p19, p20,
 		        p21, p22
 		));
-		
+		//Fin generado por IA
 
 		// Cabecera del modelo de datos
 		Vector<String> cabeceraProductos = new Vector<String>(
@@ -222,7 +230,10 @@ public class JFrameInventario extends JFrame{
 		                    "Producto seleccionado: " + nombre
 		                    + " - Stock actual: " + stock);
 
-		            btnActualizarStock.setEnabled(true);
+		            //btnActualizarStock.setEnabled(true);
+		            // Cambio el boton para que no se active cuando se está haciendo la simulación de ventas con el Thread
+		            btnActualizarStock.setEnabled(
+		                    hiloConsumo == null || !hiloConsumo.isAlive());
 
 		        } else {
 
@@ -234,7 +245,7 @@ public class JFrameInventario extends JFrame{
 
 		
 
-		// Evento del botón Actualizar stock
+		// Evento del botón Actualizar stock, te pide que indroduzcas el nuevo stock del producto seleccionado a traves de un Dialog
 		this.btnActualizarStock.addActionListener(e -> {
 
 		    int fila = tablaProductos.getSelectedRow();
@@ -343,6 +354,37 @@ public class JFrameInventario extends JFrame{
 			}
 		});
 
+		//CREO LOS BOTONES Y SUS LISTENERS para el Thread de simulación de consumo
+
+		// Botón para iniciar la simulación
+		btnIniciar = new JButton("Iniciar simulación");
+		btnIniciar.setEnabled(true);
+
+		btnIniciar.addActionListener(e -> {
+
+		    btnIniciar.setEnabled(false);
+		    btnParar.setEnabled(true);
+		    btnActualizarStock.setEnabled(false);
+
+		    // Creo y arranco el Thread
+		    hiloConsumo = new HiloConsumo();
+		    hiloConsumo.start();
+		});
+
+		// Botón para detener la simulación
+		btnParar = new JButton("Detener simulación");
+		btnParar.setEnabled(false);
+
+		btnParar.addActionListener(e -> {
+
+		    if (hiloConsumo != null) {
+		        hiloConsumo.interrupt();
+		    }
+
+		    btnParar.setEnabled(false);
+		});
+
+		
 		
 		// PONEMOS LOS COMPONENTES DE LA VENTANA 
 		// Creo el panel principal 
@@ -362,11 +404,23 @@ public class JFrameInventario extends JFrame{
 		// Tabla en el centro
 		principal.add(scrollinventario, BorderLayout.CENTER);
 
-		// Panel inferior con etiqueta y botón
+
+		// Panel inferior
 		JPanel panelInferior = new JPanel(new BorderLayout(10, 10));
 
-		panelInferior.add(lblSeleccion, BorderLayout.CENTER);
-		panelInferior.add(btnActualizarStock, BorderLayout.EAST);
+		// Panel para los botones
+		JPanel panelBotones = new JPanel(new GridLayout(1, 3, 10, 10));
+
+		panelBotones.add(btnActualizarStock);
+		panelBotones.add(btnIniciar);
+		panelBotones.add(btnParar);
+
+		// Etiqueta informativa sobre las ventas realizadas durante la simulación con el Thread
+		panelInferior.add(lblSeleccion, BorderLayout.NORTH);
+
+		// Botones
+		panelInferior.add(panelBotones, BorderLayout.CENTER);
+
 
 		// Añado panel inferior
 		principal.add(panelInferior, BorderLayout.SOUTH);
@@ -379,9 +433,86 @@ public class JFrameInventario extends JFrame{
 		this.setTitle("INVENTARIO");
 		this.setSize(800, 600);
 		this.setLocationRelativeTo(null);
+		
+		//Generado por IA
+		//Sirve para detener el Thread cuando se cierra la ventana
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent e) {
+		        if (hiloConsumo != null) {
+		            hiloConsumo.interrupt();
+		        }
+		    }
+		});
+		//FIN con IA
 	}
 	
 
+	//CREO EL THREAD PARA DIMULAR EL CONSUMO DE PRODUCTOS
+	private class HiloConsumo extends Thread {
 
-}
+		@Override
+		public void run() {
+
+			// Simulo 50 intentos de venta
+			for (int i = 0; i < 50 && !isInterrupted(); i++) {
+
+				// Selecciono un producto aleatoriamente
+				int posicion = (int) (Math.random() * productos.size());
+
+				// Actualizo el inventario desde el Thread
+				SwingUtilities.invokeLater(() -> {
+
+					if (isInterrupted()) {
+						return;
+					}
+
+					Producto p = productos.get(posicion);
+
+					// Compruebo que quedan existencias
+					if (p.getStock() > 0) {
+
+						// Descuento una unidad
+						p.setStock(p.getStock() - 1);
+
+						// Actualizo la tabla
+						modeloDatosProductos.setValueAt(
+								p.getStock(), posicion, 4);
+						
+						// Actualizo el renderizado de toda la fila, para que cambie el color de toda la fila del producto si es necesario 
+						modeloDatosProductos.fireTableRowsUpdated(posicion, posicion);
+
+						// Actualizo la informacion el el label de información de la ventana JFrameInventario
+						lblSeleccion.setText(
+								"Venta: " + p.getNombre()
+								+ " - Stock restante: " + p.getStock());
+					}
+				});
+
+				// Espero entre ventas 1000
+				try {
+					Thread.sleep(1000);
+
+				} catch (InterruptedException e) {
+					interrupt();
+					break;
+				}
+			}
+
+			// Al terminar, recupero el estado de los botones
+			SwingUtilities.invokeLater(() -> {
+
+				btnIniciar.setEnabled(true);
+				btnParar.setEnabled(false);
+				//Activo o desactivo el botón Actualizar stock dependiendo de si hay una fila seleccionada en la JTable o no.
+				btnActualizarStock.setEnabled(
+						tablaProductos.getSelectedRow() != -1);
+			});
+		}
+	} //FIN THREAS
+ 
+	
+
+}//FIN CLASE
 
