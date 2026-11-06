@@ -448,6 +448,7 @@ public class JFrameInventario extends JFrame{
 		//FIN con IA
 	}
 	
+	
 
 	//CREO EL THREAD PARA DIMULAR EL CONSUMO DE PRODUCTOS
 	private class HiloConsumo extends Thread {
