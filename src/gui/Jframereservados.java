@@ -46,7 +46,7 @@ public class Jframereservados extends JFrame {
 		//pista
 		JPanel panelpista = new JPanel();
 		panelpista.setLayout(new FlowLayout(FlowLayout.CENTER, 0,100));
-		panelpista.setBackground(Color.BLACK);
+		panelpista.setBackground(Color.LIGHT_GRAY);
 		panelpista.setBorder(BorderFactory.createLineBorder(Color.BLACK,2));
 		
 		JLabel texto = new JLabel("Pista",JLabel.CENTER);
@@ -54,8 +54,34 @@ public class Jframereservados extends JFrame {
 		texto.setForeground(Color.DARK_GRAY);
 		panelpista.add(texto, BorderLayout.CENTER);
 		add(panelpista,BorderLayout.CENTER);
+		//mesas
+		JPanel panelmesas = new JPanel (new GridLayout(4,1,10,15));
+		panelmesas.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
 		
+		//mesas derecha
+		for (int i = 0 ;  i < 4 ; i++) {
+			JButton mesa = new JButton("Mesa barata" + i);
+			mesa.setFont(new Font("Arial", Font.BOLD, 12));	
+			mesa.setBackground(new Color (230,240,255));
+			mesa.setBorder(BorderFactory.createLineBorder(Color.black,2));
+			panelmesas.add(mesa);
+		}
+		add(panelmesas, BorderLayout.EAST);
+		
+		
+		//mesas inf
+		JPanel panelmesasinf = new JPanel (new GridLayout(1,3,15,10));
+		panelmesas.setBorder(BorderFactory.createEmptyBorder(0,10,0,0));
+		panelmesasinf.setPreferredSize(new Dimension(0, 70));
+		for (int i = 0 ;  i < 3 ; i++) {
+			JButton mesa = new JButton("Mesa cara" + i);
+			mesa.setFont(new Font("Arial", Font.BOLD, 12));	
+			mesa.setBackground(new Color (230,240,255));
+			mesa.setBorder(BorderFactory.createLineBorder(Color.black,2));
+			panelmesasinf.add(mesa);
+		}
+		add(panelmesasinf, BorderLayout.SOUTH);
 
-	}
+		}
 };
 
