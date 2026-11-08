@@ -74,10 +74,13 @@ public class JFramePrincipal extends JFrame {
         btnEmpleados.addActionListener(e -> { JOptionPane.showMessageDialog(this,  "Gestión de empleados y turnos");
         });
 
-        btnVIP.addActionListener(e -> {JOptionPane.showMessageDialog(this,    "Gestión de clientes VIP y palcos");
+        btnVIP.addActionListener(e -> {
+        	Jframereservados reservado = new Jframereservados();
+        	reservado.setVisible(true);
+        	
         });
 
         add(panelPrincipal);
     }
-}
+};
 
