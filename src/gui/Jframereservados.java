@@ -120,32 +120,43 @@ public class Jframereservados extends JFrame {
         }
     }
     
-	private JButton crearmesa(String nombre, TipoMesa tipo)  {
-			    
-        EstadoMesa estado = random.nextBoolean() ? EstadoMesa.LIBRE : EstadoMesa.OCUPADA; 
+	private JButton crearmesa(String nombre, TipoMesa tipo) {
+	    EstadoMesa estado = random.nextBoolean() ? EstadoMesa.LIBRE : EstadoMesa.OCUPADA;
 
-        JButton mesa = new JButton(nombre);
-        mesa.setFont(new Font("Arial", Font.BOLD, 12));
-        mesa.setBackground(estado.getColorEstado().darker());
-        mesa.setFocusPainted(false);
-        mesa.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        mesa.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String mensaje = "Mesa: " + nombre + "\n" +
-                                 "Tipo: " + tipo.getDescripcion() + "\n" +
-                                 "Precio: " + tipo.getPrecioReserva() + "€\n" +
-                                 "Estado actual: " + estado;
+	    JButton mesa = new JButton(nombre);
+	    mesa.setFont(new Font("Arial", Font.BOLD, 12));
+	    mesa.setBackground(estado.getColorEstado().darker());
+	    mesa.setFocusPainted(false);
+	    mesa.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
-                JOptionPane.showMessageDialog(null, mensaje, "Información sobre la Mesa", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+	    mesa.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            String mensaje = "Mesa: " + nombre + "\n" +
+	                             "Tipo: " + tipo.getDescripcion() + "\n" +
+	                             "Precio: " + tipo.getPrecioReserva() + "€\n" +
+	                             "Estado actual: " + estado;
 
-        return mesa;
-    }
+	            if (estado == EstadoMesa.OCUPADA) {
+	                String[] optexto = {"Hacer Pedido", "Cerrar"};
 
-	    
-	};
+	           JOptionPane.showOptionDialog(
+	                    null,
+	                    mensaje,
+	                    "Información sobre la Mesa",
+	                    JOptionPane.DEFAULT_OPTION,
+	                    JOptionPane.INFORMATION_MESSAGE,
+	                    null,
+	                    optexto,
+	                    optexto[0]
+	                );
 
-	
+	            } else {
+	                JOptionPane.showMessageDialog(null, mensaje, "Información sobre la Mesa", JOptionPane.INFORMATION_MESSAGE);
+	            }
+	        }
+	    });
 
+	    return mesa;
+	}
+}
