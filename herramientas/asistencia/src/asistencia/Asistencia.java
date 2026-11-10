@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+//IAG (herramienta: Claude)
+//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /**
  * Lógica de presencia y registro de horas.
  *
