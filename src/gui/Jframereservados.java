@@ -13,12 +13,16 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
@@ -91,12 +95,65 @@ public class Jframereservados extends JFrame {
 	public class PanelPedido extends JPanel {
 
 		private static final long serialVersionUID = 1L;
+		
+		private JComboBox<String> productos;
+		private JSpinner cantidad;
+		private JButton confirmar;
+		
+		
+		
 		public PanelPedido (String nombre) {
-			 JButton labelpanel = new JButton("hola");
+			 setLayout(new BorderLayout(15, 15));
+			 JPanel panelogo = new JPanel(new FlowLayout(FlowLayout.CENTER));
+				JLabel logo = new JLabel("", JLabel.CENTER);
+				
+				/// Reescalado de la Imagen generado con IA:
+				ImageIcon imagen1 = new ImageIcon("./Resources/Images/LogoDiscoteca+.jpeg");
+				Image imgEscalada = imagen1.getImage().getScaledInstance(450, 140, Image.SCALE_SMOOTH);
+				logo.setIcon(new ImageIcon(imgEscalada));
+				////
+				
+				
+				panelogo.add(logo);
+				panelogo.setBackground(Color.BLACK);
+				add(panelogo, BorderLayout.NORTH);
+ 
+				JPanel panelcont = new JPanel(new BorderLayout(10, 15));
+				panelcont.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
 
-			
+				JPanel panelprod = new JPanel(new GridLayout(2, 2, 10, 15));
+				panelprod.setBorder(BorderFactory.createTitledBorder("Pedido para " + nombre));
+
+				JLabel producto = new JLabel("Producto:", JLabel.RIGHT);
+				producto.setFont(new Font("Arial", Font.BOLD, 13));
+
+				productos = new JComboBox<>(new String[] {
+				
+				});
+
+				JLabel cantidadlabel = new JLabel("Cantidad:", JLabel.RIGHT);
+				cantidadlabel.setFont(new Font("Arial", Font.BOLD, 13));
+
+				cantidad = new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
+
+				panelprod.add(producto);
+				panelprod.add(productos);
+				panelprod.add(cantidadlabel);
+				panelprod.add(cantidad);
+
+				panelcont.add(panelprod, BorderLayout.CENTER);
+
+				confirmar = new JButton("Nuevo Pedido");
+				confirmar.setFont(new Font("Arial", Font.BOLD, 13));
+				confirmar.setPreferredSize(new Dimension(0, 38));
+
+				panelcont.add(confirmar, BorderLayout.SOUTH);
+
+				add(panelcont, BorderLayout.CENTER);
+			}
+
 		}
-	};
+	
 	
 	
 	
