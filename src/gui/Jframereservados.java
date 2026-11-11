@@ -108,7 +108,7 @@ public class Jframereservados extends JFrame {
 				JLabel logo = new JLabel("", JLabel.CENTER);
 				
 				/// Reescalado de la Imagen generado con IA:
-				ImageIcon imagen1 = new ImageIcon("./Resources/Images/LogoDiscoteca+.jpeg");
+				ImageIcon imagen1 = new ImageIcon("./Resources/Images/Gemini_Generated_Image_p6xhrep6xhrep6xh.jpeg");
 				Image imgEscalada = imagen1.getImage().getScaledInstance(450, 140, Image.SCALE_SMOOTH);
 				logo.setIcon(new ImageIcon(imgEscalada));
 				////
