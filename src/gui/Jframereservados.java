@@ -14,6 +14,7 @@ import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -82,6 +83,24 @@ public class Jframereservados extends JFrame {
 		add(panelmesasinf, BorderLayout.SOUTH);
 
 		}
+	
+	
+	
+	//Panel para los pedidos
+	
+	public class PanelPedido extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+		public PanelPedido (String nombre) {
+			 JButton labelpanel = new JButton("hola");
+
+			
+		}
+	};
+	
+	
+	
+	
 
 	public enum TipoMesa {
         MESA_VIP("Zona VIP", 150.0),
@@ -106,7 +125,6 @@ public class Jframereservados extends JFrame {
 
     public enum EstadoMesa {
         LIBRE(Color.GREEN),
-        RESERVADA(Color.ORANGE),
         OCUPADA(Color.RED);
 
         private Color colorEstado;
@@ -119,6 +137,9 @@ public class Jframereservados extends JFrame {
             return colorEstado;
         }
     }
+    
+    
+   
     
 	private JButton crearmesa(String nombre, TipoMesa tipo) {
 	    EstadoMesa estado = random.nextBoolean() ? EstadoMesa.LIBRE : EstadoMesa.OCUPADA;
@@ -140,7 +161,7 @@ public class Jframereservados extends JFrame {
 	            if (estado == EstadoMesa.OCUPADA) {
 	                String[] optexto = {"Hacer Pedido", "Cerrar"};
 
-	           JOptionPane.showOptionDialog(
+	         int respuesta =  JOptionPane.showOptionDialog(
 	                    null,
 	                    mensaje,
 	                    "Información sobre la Mesa",
@@ -150,13 +171,35 @@ public class Jframereservados extends JFrame {
 	                    optexto,
 	                    optexto[0]
 	                );
+	           
+	           
+	           
+	           //Si la respuesta es que quiere un pedido abrimos un JDialog.
+	           if (respuesta == 0) {
+	        	   realizarpedido(nombre);
+	        	   
+	           }
 
 	            } else {
 	                JOptionPane.showMessageDialog(null, mensaje, "Información sobre la Mesa", JOptionPane.INFORMATION_MESSAGE);
 	            }
 	        }
+
+			private void realizarpedido(String nombre) {
+				JDialog dialog = new JDialog(Jframereservados.this, "Pedido para la mesa " + nombre, true); //Pregunta a la IA acerca de los campos del JDialog.
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		        dialog.setSize(450, 350);
+		        dialog.setLocationRelativeTo(Jframereservados.this); //pregunta  al IA sobre porqué el .this va al final.
+		        
+		        PanelPedido panel = new PanelPedido(nombre);
+		        dialog.setContentPane(panel);
+		        dialog.setVisible(true);
+			}
 	    });
 
 	    return mesa;
 	}
 }
+
+
+
