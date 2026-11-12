@@ -21,7 +21,6 @@ import javax.swing.table.DefaultTableModel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableCellRenderer;
@@ -122,27 +121,32 @@ public class JFrameInventario extends JFrame{
 		//Si el stock <stockminimo, amarillo
 		//Si el stock > stock minimo, verde
 		
-		TableCellRenderer mirenderer = new TableCellRenderer() {
+		TableCellRenderer mirenderer = (table, value, isSelected, hasFocus, row, column) ->  {
 
-		    @Override
-		    public Component getTableCellRendererComponent(JTable table, Object value,
-		            boolean isSelected, boolean hasFocus, int row, int column) {
+
 
 		        JLabel result = new JLabel();
 
 		        // Mostrar el valor de la celda
-		        result.setText(value != null ? value.toString() : "");
-
+		        if (value != null) {
+		            result.setText(value.toString());
+		        } else {
+		            result.setText("");
+		        }
+		       
 		        // Obtener el stock y el stock mínimo
-		        int filaModelo = table.convertRowIndexToModel(row);
 
-		        int stock = (int) modeloDatosProductos.getValueAt(filaModelo, 4);
-		        int stockmin = (int) modeloDatosProductos.getValueAt(filaModelo, 5);
+		        int stock = (int) table.getValueAt(row, 4);
+		        int stockmin = (int) table.getValueAt(row, 5);
 
 		        result.setOpaque(true);
 
 		        // Coloreo según el stock
-		        if (stock == 0) { //Rojo, cuando no hay stock del producto
+		        // Si la fila está seleccionada
+		        if (isSelected) { 
+		            result.setBackground(table.getSelectionBackground());
+		            result.setForeground(table.getSelectionForeground());
+		        }else if (stock == 0) { //Rojo, cuando no hay stock del producto
 		            result.setBackground(new Color(255, 180, 180));
 
 		        } else if (stock <= stockmin) { 
@@ -153,25 +157,15 @@ public class JFrameInventario extends JFrame{
 		        	//Verde, hay stock y es mayor que el stock mínimo
 		            result.setBackground(new Color(210, 245, 210));
 		        }
-
-		        // Si la fila está seleccionada
-		        if (isSelected) { 
-		            result.setBackground(table.getSelectionBackground());
-		            result.setForeground(table.getSelectionForeground());
-		        }
-
 		        return result;
-		    }
+		    
 		};
 
 		// Aplico el renderer a todas las columnas
-		for (int i = 0; i < tablaProductos.getColumnCount(); i++) {
-		    tablaProductos.getColumnModel().getColumn(i)
-		            .setCellRenderer(mirenderer);
-		}
 		
+		tablaProductos.setDefaultRenderer(Object.class, mirenderer);
 		
-		
+		tablaProductos.getTableHeader().setReorderingAllowed(false);
 		
 		// Sólo permito la elección de una sola fila de la tabla
 		this.tablaProductos.setSelectionMode(
@@ -210,37 +204,29 @@ public class JFrameInventario extends JFrame{
 		
 
 		// Evento al seleccionar una fila de la tabla
-		this.tablaProductos.getSelectionModel().addListSelectionListener(e -> {
+		this.tablaProductos.addMouseListener(new MouseAdapter() {
 
-		    if (!e.getValueIsAdjusting()) {
-
-		        int fila = tablaProductos.getSelectedRow();
-
-		        if (fila != -1) {
-
-		            int filaModelo = tablaProductos.convertRowIndexToModel(fila);
-
-		            String nombre = (String) modeloDatosProductos.getValueAt(
-		                    filaModelo, 1);
-
-		            int stock = (int) modeloDatosProductos.getValueAt(
-		                    filaModelo, 4);
-
-		            lblSeleccion.setText(
-		                    "Producto seleccionado: " + nombre
-		                    + " - Stock actual: " + stock);
-
-		            //btnActualizarStock.setEnabled(true);
-		            // Cambio el boton para que no se active cuando se está haciendo la simulación de ventas con el Thread
-		            btnActualizarStock.setEnabled(
-		                    hiloConsumo == null || !hiloConsumo.isAlive());
-
-		        } else {
-
-		            lblSeleccion.setText("Selecciona un producto de la tabla");
-		            btnActualizarStock.setEnabled(false);
-		        }
-		    }
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int fila = tablaProductos.getSelectedRow();
+				
+				if (fila != -1) {
+					String nombre = (String) tablaProductos.getValueAt(fila, 1);
+					int stock = (int) tablaProductos.getValueAt(fila, 4);
+					
+					lblSeleccion.setText(
+							"Producto seleccionado: " + nombre
+							+ " - Stock actual: " + stock);
+					//btnActualizarStock.setEnabled(true);
+					// Cambio el boton para que no se active cuando se está haciendo la simulación de ventas con el Thread
+					btnActualizarStock.setEnabled(
+							hiloConsumo == null || !hiloConsumo.isAlive());
+				} else {
+					lblSeleccion.setText("Selecciona un producto de la tabla");
+					btnActualizarStock.setEnabled(false);
+			    }
+			    
+			}
 		});
 
 		
@@ -252,9 +238,7 @@ public class JFrameInventario extends JFrame{
 
 		    if (fila != -1) {
 
-		        int filaModelo = tablaProductos.convertRowIndexToModel(fila);
-
-		        int id = (int) modeloDatosProductos.getValueAt(filaModelo, 0);
+		        int id = (int) tablaProductos.getValueAt(fila, 0);
 
 		        // Busco el producto seleccionado en el ArrayList
 		        Producto productoSeleccionado = null;
@@ -298,7 +282,8 @@ public class JFrameInventario extends JFrame{
 		            productoSeleccionado.setStock(nuevoStock);
 
 		            // Actualizo el modelo de la JTable
-		            modeloDatosProductos.setValueAt(nuevoStock, filaModelo, 4);
+		            tablaProductos.setValueAt(nuevoStock, fila, 4);
+		            tablaProductos.repaint();
 
 		            // Actualizo la etiqueta inferior
 		            lblSeleccion.setText(
@@ -334,13 +319,11 @@ public class JFrameInventario extends JFrame{
 
 					if (fila != -1) {
 
-						int filaModelo =tablaProductos.convertRowIndexToModel(fila);
+						int id = (int) tablaProductos.getValueAt(fila, 0);
 
-						int id = (int) modeloDatosProductos.getValueAt(filaModelo, 0);
+						String nombre = (String) tablaProductos.getValueAt(fila, 1);
 
-						String nombre = (String) modeloDatosProductos.getValueAt(filaModelo, 1);
-
-						int stock = (int) modeloDatosProductos.getValueAt(filaModelo, 4);
+						int stock = (int) tablaProductos.getValueAt(fila, 4);
 
 						JOptionPane.showMessageDialog(
 								JFrameInventario.this,
