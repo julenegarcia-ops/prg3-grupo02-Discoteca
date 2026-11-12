@@ -40,13 +40,13 @@ public class JFramePrincipal extends JFrame {
         JButton btnEventos = new JButton("Gestión de eventos");
         JButton btnEntradas = new JButton("Venta de entradas");
         JButton btnInventario = new JButton("Inventario");
-        JButton btnEmpleados = new JButton("Empleados y turnos");
+        JButton btnFacturas = new JButton("Facturas");
         JButton btnVIP = new JButton("Clientes VIP y palcos");
 
         panelBotones.add(btnEventos);
         panelBotones.add(btnEntradas);
         panelBotones.add(btnInventario);
-        panelBotones.add(btnEmpleados);
+        panelBotones.add(btnFacturas);
         panelBotones.add(btnVIP);
 
         panelPrincipal.add(panelBotones, BorderLayout.CENTER);
@@ -73,7 +73,9 @@ public class JFramePrincipal extends JFrame {
         	
         });
 
-        btnEmpleados.addActionListener(e -> { JOptionPane.showMessageDialog(this,  "Gestión de empleados y turnos");
+        btnFacturas.addActionListener(e -> {
+        	JFrameFacturas ventana = new JFrameFacturas();
+		ventana.setVisible(true);
         });
 
         btnVIP.addActionListener(e -> {
