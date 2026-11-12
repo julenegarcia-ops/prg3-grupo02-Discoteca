@@ -34,6 +34,7 @@ public class Jframereservados extends JFrame {
 	private JPanel panelbarra;
 	private JLabel camarero;
 	private Thread hilocamarero;
+	private JPanel panelpista;
 	private volatile boolean corriendo = false;
 
 	public Jframereservados() {
@@ -52,7 +53,7 @@ public class Jframereservados extends JFrame {
 				TitledBorder.CENTER, TitledBorder.TOP));
 		add(panelbarra, BorderLayout.NORTH);
 		// pista
-		JPanel panelpista = new JPanel();
+	    panelpista = new JPanel();
 		panelpista.setLayout(null);
 		panelpista.setBackground(Color.LIGHT_GRAY);
 		panelpista.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
@@ -114,7 +115,7 @@ public class Jframereservados extends JFrame {
 		private JSpinner cantidad;
 		private JButton confirmar;
 
-		public PanelPedido(String nombre) {
+		public PanelPedido(String nombre, JButton mesa, TipoMesa tipo) {
 			setLayout(new BorderLayout(15, 15));
 			JPanel panelogo = new JPanel(new FlowLayout(FlowLayout.CENTER));
 			JLabel logo = new JLabel("", JLabel.CENTER);
@@ -206,6 +207,10 @@ public class Jframereservados extends JFrame {
 			        
 			        panelbarra.repaint();
 			        SwingUtilities.getWindowAncestor(PanelPedido.this).dispose();
+			        String producto = (String) productos.getSelectedItem();
+					int cantidd = (int) cantidad.getValue();
+					hilocamarero = new HiloCamarero(mesa, tipo, producto, cantidd);
+					hilocamarero.start();
 				}
 			});
 
@@ -215,6 +220,96 @@ public class Jframereservados extends JFrame {
 		}
 	}
 
+	//clase del hilo.
+
+	        
+	        private class HiloCamarero extends Thread {
+
+	            private JButton botonMesa;
+	            private TipoMesa tipo;
+	            private String producto;
+	            private int cantidad;
+
+	            public HiloCamarero(JButton botonMesa, TipoMesa tipo, String producto, int cantidad) {
+	                this.botonMesa = botonMesa;
+	                this.tipo = tipo;
+	                this.producto = producto;
+	                this.cantidad = cantidad;
+	            }
+
+	            @Override
+	            public void run() {
+	                int xInicio = 265;
+	                int yInicio = 10;
+
+	                int xDestino;
+	                int yDestino;
+	                //He usado la IA para que me ayude a colocar exáctamente en los puntos correctos 
+	                //las mesas, y como hacer los cálculos correspondientes para que mi label se mueva hacia
+	                //las mesas que yo deseo. 
+	                if (tipo == TipoMesa.MESA_NORMAL) {
+	                    xDestino = panelpista.getWidth() - camarero.getWidth() - 5;
+	                    yDestino = botonMesa.getY() + (botonMesa.getHeight() / 2) - (camarero.getHeight() / 2);
+	                } else {
+	                    xDestino = botonMesa.getX() + (botonMesa.getWidth() / 2) - (camarero.getWidth() / 2);
+	                    yDestino = panelpista.getHeight() - camarero.getHeight() - 5;
+	                }
+
+	                try {
+	                    mover(xInicio, yInicio, xDestino, yDestino, 60);
+
+	                    //confirmación
+	                    SwingUtilities.invokeLater(() -> {
+	                        JOptionPane.showMessageDialog(
+	                                Jframereservados.this,
+	                                "¡Producto entregado!\n(" + cantidad + "x " + producto + " en " + botonMesa.getText() + ")",
+	                                "Entrega",
+	                                JOptionPane.INFORMATION_MESSAGE);
+	                    });
+
+	                    mover(xDestino, yDestino, xInicio, yInicio, 60);
+	                    SwingUtilities.invokeLater(() -> {
+	                        camarero.setVisible(false);
+	                        camarero.setLocation(xInicio, yInicio);
+	                        panelbarra.removeAll();
+	                        panelbarra.revalidate();
+	                        panelbarra.repaint();
+	                    });
+	                
+	                } catch (InterruptedException e) {
+	                    SwingUtilities.invokeLater(() -> {
+	                        JOptionPane.showMessageDialog(
+	                                Jframereservados.this,
+	                                "Pedido cancelado.",
+	                                "Cancelado",
+	                                JOptionPane.WARNING_MESSAGE);
+	                        
+	                        
+	                        
+	                    });
+	                } 
+	            }
+
+	            private void mover(int posx1, int posy1, int posx2, int posy2, int pasos) throws InterruptedException {
+	                for (int i = 1; i <= pasos; i++) {
+	                    while (corriendo) {
+	                        Thread.sleep(100);
+	                    }
+
+	                    int xActual = posx1 + (posx2 - posx1) * i / pasos;
+	                    int yActual = posy1 + (posy2 - posy1) * i / pasos;
+
+	                    SwingUtilities.invokeLater(() -> camarero.setLocation(xActual, yActual));
+
+	                    Thread.sleep(50); //velocidad
+	                }
+	            }
+	        }
+	        
+	        
+	        
+	    
+	    
 	public enum TipoMesa {
 		MESA_VIP("Zona VIP", 150.0), MESA_NORMAL("Zona General", 50.0);
 
@@ -272,8 +367,7 @@ public class Jframereservados extends JFrame {
 
 					// Si la respuesta es que quiere un pedido abrimos un JDialog.
 					if (respuesta == 0) {
-						realizarpedido(nombre);
-
+						realizarpedido(nombre, mesa, tipo);
 					}
 
 				} else {
@@ -282,7 +376,7 @@ public class Jframereservados extends JFrame {
 				}
 			}
 
-			private void realizarpedido(String nombre) {
+			private void realizarpedido(String nombre, JButton mesa, TipoMesa tipo) {
 				JDialog dialog = new JDialog(Jframereservados.this, "Pedido para la mesa " + nombre, true); // Pregunta
 																											// a la IA
 																											// acerca de
@@ -295,7 +389,7 @@ public class Jframereservados extends JFrame {
 				dialog.setLocationRelativeTo(Jframereservados.this); // pregunta al IA sobre porqué el .this va al
 																		// final.
 
-				PanelPedido panel = new PanelPedido(nombre);
+				PanelPedido panel = new PanelPedido(nombre, mesa, tipo);
 				dialog.setContentPane(panel);
 				dialog.setVisible(true);
 			}
@@ -305,3 +399,6 @@ public class Jframereservados extends JFrame {
 	}
 }
 
+//IDEAS DE MEJORA DE CÓDIGO A FUTURO
+
+//ESTARIA BIEN INTENTAR FUSIONAR MEDIANTE UNA BD Y UN HILO EL TEMA DE LOS PEDIDOS DE LOS RESERVADOS Y EL INVENTARIO
