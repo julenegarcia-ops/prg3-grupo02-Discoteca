@@ -93,6 +93,8 @@ public class JFrameInventario extends JFrame{
 		));
 		//Fin generado por IA
 
+		
+		
 		// Cabecera del modelo de datos
 		Vector<String> cabeceraProductos = new Vector<String>(
 		        Arrays.asList("ID", "NOMBRE", "CATEGORÍA",

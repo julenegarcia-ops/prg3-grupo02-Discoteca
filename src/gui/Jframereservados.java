@@ -32,6 +32,7 @@ public class Jframereservados extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private Random random = new Random(); 
+	private JPanel panelbarra;
 
 	public Jframereservados () {
 
@@ -42,12 +43,12 @@ public class Jframereservados extends JFrame {
         setLayout(new BorderLayout(10,10));
 
 		
-		//escaleras
-		JPanel panelescaleras = new JPanel();
-		panelescaleras.setPreferredSize(new Dimension(0,80));
-		panelescaleras.setBackground(new Color(220,220,220));
-		panelescaleras.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK,2),"Escaleras",TitledBorder.CENTER,TitledBorder.TOP));
-		add (panelescaleras, BorderLayout.NORTH);
+		//Barra
+		 panelbarra = new JPanel();
+		panelbarra.setPreferredSize(new Dimension(0,80));
+		panelbarra.setBackground(new Color(220,220,220));
+		panelbarra.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK,2),"Barra",TitledBorder.CENTER,TitledBorder.TOP));
+		add (panelbarra, BorderLayout.NORTH);
 		//pista
 		JPanel panelpista = new JPanel();
 		panelpista.setLayout(new FlowLayout(FlowLayout.CENTER, 0,100));
@@ -108,7 +109,7 @@ public class Jframereservados extends JFrame {
 				JLabel logo = new JLabel("", JLabel.CENTER);
 				
 				/// Reescalado de la Imagen generado con IA:
-				ImageIcon imagen1 = new ImageIcon("./Resources/Images/Gemini_Generated_Image_p6xhrep6xhrep6xh.jpeg");
+				ImageIcon imagen1 = new ImageIcon("./Resources/Images/LogoDiscoteca+.jpeg");
 				Image imgEscalada = imagen1.getImage().getScaledInstance(450, 140, Image.SCALE_SMOOTH);
 				logo.setIcon(new ImageIcon(imgEscalada));
 				////
@@ -128,7 +129,29 @@ public class Jframereservados extends JFrame {
 				producto.setFont(new Font("Arial", Font.BOLD, 13));
 
 				productos = new JComboBox<>(new String[] {
-				
+							    "Coca-Cola - 3.0€",
+							    "Coca-Cola Zero - 3.0€",
+							    "Fanta Naranja - 3.0€",
+							    "Fanta Limón - 3.0€",
+							    "Sprite - 3.0€",
+							    "Red Bull - 4.5€",
+							    "Monster - 4.0€",
+							    "Red Bull Sugarfree - 4.5€",
+							    "Heineken - 4.0€",
+							    "Estrella Galicia - 3.5€",
+							    "Mahou - 3.5€",
+							    "Cerveza sin alcohol - 3.0€",
+							    "Vodka Absolut - 8.0€",
+							    "Ron Barceló - 8.0€",
+							    "Whisky Ballantines - 9.0€",
+							    "Ginebra Beefeater - 9.0€",
+							    "Tequila José Cuervo - 7.0€",
+							    "Jägermeister - 6.0€",
+							    "Agua mineral - 2.0€",
+							    "Zumo de piña - 3.0€",
+							    "Tónica - 2.5€",
+							    "Hielo - 1.0€"
+							
 				});
 
 				JLabel cantidadlabel = new JLabel("Cantidad:", JLabel.RIGHT);
@@ -146,17 +169,34 @@ public class Jframereservados extends JFrame {
 				confirmar = new JButton("Nuevo Pedido");
 				confirmar.setFont(new Font("Arial", Font.BOLD, 13));
 				confirmar.setPreferredSize(new Dimension(0, 38));
-
+				
+				confirmar.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						panelbarra.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 15));
+						//No creamos el boton iniciar porque asumimos que al "aceptar pedido", ya has 
+						//aceptado este mismo
+						JButton detener = new JButton("Detener");
+						JButton cancelar = new JButton("Cancelar pedido");
+						
+						
+						panelbarra.add(detener);
+						panelbarra.add(cancelar);
+						
+						//Lineas hechas con IA para "refrescar el objeto y cerrar la ventana de contenedor"
+						panelbarra.revalidate();
+				        panelbarra.repaint();
+				        SwingUtilities.getWindowAncestor(PanelPedido.this).dispose();
+					}
+				
+				}); 
 				panelcont.add(confirmar, BorderLayout.SOUTH);
-
-				add(panelcont, BorderLayout.CENTER);
-			}
-
+				add(panelcont, BorderLayout.CENTER);	
+					
 		}
-	
-	
-	
-	
+	}
 	
 
 	public enum TipoMesa {
