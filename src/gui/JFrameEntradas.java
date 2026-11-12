@@ -2,6 +2,10 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,6 +26,9 @@ public class JFrameEntradas extends JFrame {
 	private GestorEntradas gestor;
 	private EntradaTableModel modelo;
 	private JTable tabla;
+	private JLabel lblWeb;
+	private List<HiloComprador> compradores = new ArrayList<>();
+	private boolean avisoSoldOutDado = false;
 
 	public JFrameEntradas() {
 		gestor = new GestorEntradas();
@@ -45,19 +52,96 @@ public class JFrameEntradas extends JFrame {
 		JPanel panelBotones = new JPanel();
 		JButton btnVender = new JButton("Registrar venta");
 		JButton btnDevolver = new JButton("Devolver");
+		JButton btnAforo = new JButton("Ver aforo");
+		JButton btnAbrirWeb = new JButton("Abrir web");
+		JButton btnCerrarWeb = new JButton("Cerrar web");
+		lblWeb = new JLabel("Web: cerrada");
 		panelBotones.add(btnVender);
 		panelBotones.add(btnDevolver);
+		panelBotones.add(btnAforo);
+		panelBotones.add(btnAbrirWeb);
+		panelBotones.add(btnCerrarWeb);
+		panelBotones.add(lblWeb);
 		panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
 
 		btnVender.addActionListener(e -> {
 			JDialogVenta dialogo = new JDialogVenta(this, gestor);
 			dialogo.setVisible(true); // al ser modal, espera aqui hasta que se cierre
-			modelo.fireTableDataChanged(); // la tabla se repinta con las entradas nuevas
+			actualizarTabla();
 		});
 
 		btnDevolver.addActionListener(e -> devolver());
 
+		btnAforo.addActionListener(e -> {
+			JDialogAforo dialogo = new JDialogAforo(this, gestor);
+			dialogo.setVisible(true);
+		});
+
+		btnAbrirWeb.addActionListener(e -> abrirWeb());
+		btnCerrarWeb.addActionListener(e -> cerrarWeb());
+
+		// si cierran la ventana con la web abierta, paro los hilos
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				cerrarWeb();
+			}
+		});
+
 		add(panelPrincipal);
+	}
+
+	public void actualizarTabla() {
+		modelo.setEntradas(gestor.getEntradas());
+	}
+
+	private void abrirWeb() {
+		if (webAbierta()) {
+			JOptionPane.showMessageDialog(this, "La web ya esta abierta");
+			return;
+		}
+		if (gestor.todoVendido()) {
+			JOptionPane.showMessageDialog(this, "Ya no quedan plazas en ningun evento", "SOLD OUT",
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		avisoSoldOutDado = false;
+		compradores.clear();
+		for (int i = 0; i < 3; i++) {
+			HiloComprador hilo = new HiloComprador(gestor, this);
+			compradores.add(hilo);
+			hilo.start();
+		}
+		lblWeb.setText("Web: abierta (3 compradores)");
+	}
+
+	private void cerrarWeb() {
+		for (HiloComprador hilo : compradores) {
+			hilo.interrupt();
+		}
+		lblWeb.setText("Web: cerrada");
+	}
+
+	private boolean webAbierta() {
+		for (HiloComprador hilo : compradores) {
+			if (hilo.isAlive()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// la llaman los 3 hilos al llenarse todo, pero el aviso solo sale una vez
+	public void avisarSoldOut() {
+		if (avisoSoldOutDado) {
+			return;
+		}
+		avisoSoldOutDado = true;
+		cerrarWeb();
+		lblWeb.setText("Web: cerrada (SOLD OUT)");
+		JOptionPane.showMessageDialog(this, "SOLD OUT: todos los eventos estan llenos", "SOLD OUT",
+				JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void devolver() {
@@ -76,7 +160,7 @@ public class JFrameEntradas extends JFrame {
 
 		if (respuesta == JOptionPane.YES_OPTION) {
 			gestor.devolver(entrada);
-			modelo.fireTableDataChanged();
+			actualizarTabla();
 		}
 	}
 }

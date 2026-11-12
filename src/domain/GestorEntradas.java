@@ -50,7 +50,17 @@ public class GestorEntradas {
 		return eventos;
 	}
 
-	public List<Entrada> getEntradas() {
-		return entradas;
+	// devuelve una copia: la tabla lee la copia mientras los hilos siguen vendiendo en la original
+	public synchronized List<Entrada> getEntradas() {
+		return new ArrayList<>(entradas);
+	}
+
+	public boolean todoVendido() {
+		for (Evento ev : eventos) {
+			if (plazasLibres(ev) > 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

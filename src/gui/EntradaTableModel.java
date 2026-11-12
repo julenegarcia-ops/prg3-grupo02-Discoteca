@@ -48,6 +48,11 @@ public class EntradaTableModel extends AbstractTableModel {
 		};
 	}
 
+	public void setEntradas(List<Entrada> entradas) {
+		this.entradas = entradas;
+		fireTableDataChanged();
+	}
+
 	public Entrada getEntrada(int fila) {
 		return entradas.get(fila);
 	}
