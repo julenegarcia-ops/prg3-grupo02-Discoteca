@@ -62,9 +62,7 @@ public class JFramePrincipal extends JFrame {
             ventana.setVisible(true);
         });*/
         
-        btnEntradas.addActionListener(e -> {
-        	JFrameEntradas ventana = new JFrameEntradas();
-        	ventana.setVisible(true);
+        btnEntradas.addActionListener(e -> {JOptionPane.showMessageDialog(this, "Venta de entradas");
         });
 
         btnInventario.addActionListener(e -> {  

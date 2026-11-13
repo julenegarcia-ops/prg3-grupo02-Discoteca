@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//IAG (herramienta: Claude)
-//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /** Chat del grupo sobre los comentarios de una Issue del repositorio. */
 final class Chat {
     record Mensaje(long id, String autor, Instant fecha, String texto) {}

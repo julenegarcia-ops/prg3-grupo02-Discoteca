@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-//IAG (herramienta: Claude)
-//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /**
  * Configuración LOCAL de cada persona (en su carpeta de usuario, nunca en el repositorio):
  * ~/.discoteca-asistencia/config.properties

@@ -30,8 +30,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
-//IAG (herramienta: Claude)
-//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /** Punto de entrada: configura, conecta con GitHub y arranca la sesión. */
 public final class App {
     private static FileLock candado; // se mantiene mientras la app está abierta

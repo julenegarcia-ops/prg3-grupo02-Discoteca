@@ -34,8 +34,6 @@ import javax.swing.Timer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-//IAG (herramienta: Claude)
-//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /** Ventana principal: estado de tu sesión, el equipo y el chat. */
 final class Ventana extends JFrame {
     private static final Color VERDE = new Color(0x1E9E4A);
