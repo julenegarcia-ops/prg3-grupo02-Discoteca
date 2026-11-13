@@ -14,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+//IAG (herramienta: Claude)
+//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /**
  * Cliente de la API REST de GitHub. Todo se guarda en el propio repositorio:
  *  - rama {@value #RAMA}: presencia/&lt;login&gt;.json y registro/&lt;login&gt;.csv

@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+//IAG (herramienta: Claude)
+//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /**
  * Al abrir la app: copia de seguridad de tu carpeta del proyecto y después la actualiza con lo que hay en GitHub.
  *
