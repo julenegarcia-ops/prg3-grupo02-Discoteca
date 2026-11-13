@@ -56,11 +56,11 @@ public class JFramePrincipal extends JFrame {
             JOptionPane.showMessageDialog(this, "Gestión de eventos");
         });
         
-        /*
+        
         btnEventos.addActionListener(e -> {
             JFrameEventos ventana = new JFrameEventos();
             ventana.setVisible(true);
-        });*/
+        });
         
         btnEntradas.addActionListener(e -> {
         	JFrameEntradas ventana = new JFrameEntradas();
@@ -72,18 +72,19 @@ public class JFramePrincipal extends JFrame {
         	ventana.setVisible(true);
         	
         });
+        /*
 
         btnFacturas.addActionListener(e -> {
         	JFrameFacturas ventana = new JFrameFacturas();
 		ventana.setVisible(true);
         });
-
+*/
         btnVIP.addActionListener(e -> {
         	Jframereservados reservado = new Jframereservados();
         	reservado.setVisible(true);
         	
         });
-
+        
         add(panelPrincipal);
     }
 };
