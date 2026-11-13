@@ -72,13 +72,12 @@ public class JFramePrincipal extends JFrame {
         	ventana.setVisible(true);
         	
         });
-        /*
 
         btnFacturas.addActionListener(e -> {
         	JFrameFacturas ventana = new JFrameFacturas();
 		ventana.setVisible(true);
         });
-*/
+
         btnVIP.addActionListener(e -> {
         	Jframereservados reservado = new Jframereservados();
         	reservado.setVisible(true);

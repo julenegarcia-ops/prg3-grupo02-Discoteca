@@ -10,6 +10,7 @@ public class GestorEntradas {
 	private int siguienteNumero = 1;
 
 	public GestorEntradas() {
+		//IAG (herramienta: Claude): eventos de prueba
 		eventos.add(new Evento(1, "Halloween", "31-10-2026", 20, 1.0));
 		eventos.add(new Evento(2, "Fiesta universitaria", "20-11-2026", 10, 0.8));
 		eventos.add(new Evento(3, "Nochevieja", "31-12-2026", 15, 1.2));

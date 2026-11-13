@@ -14,6 +14,7 @@ import domain.TipoEntrada;
 
 public class HiloComprador extends Thread {
 
+	//IAG (herramienta: Claude): nombres y DNI de prueba de los compradores
 	private static final String[] NOMBRES = { "Ane", "Jon", "Maite", "Unai", "Leire", "Mikel", "Nerea", "Asier" };
 
 	private GestorEntradas gestor;
@@ -49,6 +50,7 @@ public class HiloComprador extends Thread {
 			Evento evento = conPlazas.get(random.nextInt(conPlazas.size()));
 			TipoEntrada tipo = random.nextBoolean() ? TipoEntrada.NORMAL : TipoEntrada.VIP;
 			String nombre = NOMBRES[random.nextInt(NOMBRES.length)];
+			//IAG (herramienta: Claude)
 			String dni = String.format("%08d", random.nextInt(100000000)) + (char) ('A' + random.nextInt(26));
 
 			// puede devolver null si otro hilo se ha llevado la ultima plaza justo antes
