@@ -15,6 +15,8 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
 
+//IAG (herramienta: Claude)
+//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /** Ventana emergente «¿Sigues ahí?»: siempre encima, con cuenta atrás. */
 final class Comprobacion extends JDialog {
     private final Instant limite;

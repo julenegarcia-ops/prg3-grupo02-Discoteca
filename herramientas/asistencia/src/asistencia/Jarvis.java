@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+//IAG (herramienta: Claude)
+//SIN CAMBIOS (clase completa de la app de asistencia del grupo, herramientas/asistencia)
 /**
  * Integración OPCIONAL con JARVIS (solo si en tu config.properties pones jarvis.url y jarvis.token).
  * Envía avisos a «Compartir con JARVIS» (POST /api/share): te llegan aunque no estés delante del PC.
