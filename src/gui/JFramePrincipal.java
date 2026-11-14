@@ -52,11 +52,7 @@ public class JFramePrincipal extends JFrame {
         panelPrincipal.add(panelBotones, BorderLayout.CENTER);
 
         // Eventos de los botones
-        btnEventos.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Gestión de eventos");
-        });
-        
-        
+     
         btnEventos.addActionListener(e -> {
             JFrameEventos ventana = new JFrameEventos();
             ventana.setVisible(true);

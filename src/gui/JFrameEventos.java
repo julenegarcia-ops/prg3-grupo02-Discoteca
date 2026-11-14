@@ -71,25 +71,28 @@ public class JFrameEventos extends JFrame {
 	}
 
 	//DATOS HECHO CON IA
-	private void cargarDatos() {
-		fechasPorEvento.put("Fiesta ibicenca",
-				new String[] { "06/06/2026", "13/06/2026", "20/06/2026", "27/06/2026", "04/07/2026" });
-		fechasPorEvento.put("Fiesta tecno",
-				new String[] { "05/12/2026", "12/12/2026", "19/12/2026", "09/01/2027", "16/01/2027" });
-		fechasPorEvento.put("Fiesta de máscaras",
-				new String[] { "13/02/2027", "20/02/2027", "27/02/2027", "06/03/2027", "13/03/2027" });
-		fechasPorEvento.put("Fiesta de roles",
-				new String[] { "28/11/2026", "23/01/2027", "30/01/2027", "06/02/2027", "20/03/2027" });
-		fechasPorEvento.put("Graduación",
-				new String[] { "29/05/2027", "05/06/2027", "12/06/2027", "19/06/2027", "26/06/2027" });
-		fechasPorEvento.put("Privado",
-				new String[] { "21/11/2026", "27/11/2026", "11/12/2026", "18/12/2026", "15/01/2027" });
 
-		// Al principio todas las fechas están libres (false = no reservada)
-		for (String tipo : TIPOS_EVENTO) {
-			reservasPorEvento.put(tipo, new boolean[5]);
-		}
-	}
+    private void cargarDatos() {
+        fechasPorEvento.put("Fiesta ibicenca",
+                        new String[] { "03-07-2027", "10-07-2027", "17-07-2027", "24-07-2027", "31-07-2027" });
+        fechasPorEvento.put("Fiesta tecno",
+                        new String[] { "05-12-2026", "12-12-2026", "19-12-2026", "09-01-2027", "16-01-2027" });
+        fechasPorEvento.put("Fiesta de máscaras",
+                        new String[] { "13-02-2027", "20-02-2027", "27-02-2027", "06-03-2027", "13-03-2027" });
+        fechasPorEvento.put("Fiesta de roles",
+                        new String[] { "28-11-2026", "23-01-2027", "30-01-2027", "06-02-2027", "20-03-2027" });
+        fechasPorEvento.put("Graduación",
+                        new String[] { "29-05-2027", "05-06-2027", "12-06-2027", "19-06-2027", "26-06-2027" });
+        fechasPorEvento.put("Privado",
+                        new String[] {"21-11-2026", "27-11-2026", "11-12-2026", "18-12-2026", "15-01-2027" });
+
+        // Al principio todas las fechasestán libres (false = no reservada)
+        for (String tipo : TIPOS_EVENTO) {
+                reservasPorEvento.put(tipo, new boolean[5]);
+        }
+}
+		
+	
 
 //BOTONES DE EVENTOS
 	private JPanel crearPanelEventos() {
@@ -218,11 +221,5 @@ public class JFrameEventos extends JFrame {
 		actualizarFecha(posicion);
 	}
 
-	//main prueba (IA)
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			JFrameEventos ventana = new JFrameEventos();
-			ventana.setVisible(true);
-		});
-	}
+
 }
