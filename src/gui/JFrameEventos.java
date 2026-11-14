@@ -198,36 +198,26 @@ public class JFrameEventos extends JFrame {
 
 	}
 
+    private void reservarFecha(int posicion) {
+        String fecha = fechasPorEvento.get(eventoSeleccionado)[posicion];
+
+        if (estaReservada(posicion)) {
+                JOptionPane.showMessageDialog(this, "La fecha " + fecha + " ya está reservada", "Aviso",
+                                JOptionPane.WARNING_MESSAGE);
+                return;
+        }
+
+        JDialogReservaEvento dialogo = new JDialogReservaEvento(this, siguienteId, eventoSeleccionado, fecha);
+        dialogo.setVisible(true); // modal: el código se para aquí hasta que se cierre
+
+        ReservaEvento nueva = dialogo.getReserva();
+        if (nueva != null) {
+                siguienteId++;
+                reservasPorEvento.get(eventoSeleccionado)[posicion] = nueva;
+        }
+        actualizarFecha(posicion);
+}
 	
-	private void reservarFecha(int posicion) {
-		String fecha = fechasPorEvento.get(eventoSeleccionado)[posicion];
-
-		if (estaReservada(posicion)) {
-			JOptionPane.showMessageDialog(this, "La fecha " + fecha + " ya está reservada", "Aviso",
-					JOptionPane.WARNING_MESSAGE);
-			return;
-		}
-
-		String cliente = JOptionPane.showInputDialog(this, "Nombre del cliente:", "Reservar " + fecha,
-				JOptionPane.QUESTION_MESSAGE);
-
-		// si cancela o no escribe nada no se reserva (IA)
-		if (cliente == null || cliente.trim().isEmpty()) {
-			actualizarFecha(posicion);
-			return;
-		}
-
-		int respuesta = JOptionPane.showConfirmDialog(this,
-				"¿Reservar " + eventoSeleccionado + " el " + fecha + " para " + cliente + "?", "Confirmar reserva",
-				JOptionPane.YES_NO_OPTION);
-
-        if (respuesta == JOptionPane.YES_OPTION) {
-            // de momento DNI vacío y 1 persona; en el paso 3 lo pedirá el JDialog
-            Evento evento = new Evento(siguienteId, eventoSeleccionado, fecha, 1, 1.0);
-            siguienteId++;
-            reservasPorEvento.get(eventoSeleccionado)[posicion] = new ReservaEvento(evento, cliente, "");
-    }
-	}
 
 
 }
