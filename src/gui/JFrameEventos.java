@@ -19,6 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import domain.Evento;
+import domain.ReservaEvento;
+
 
 public class JFrameEventos extends JFrame {
 
@@ -33,8 +36,8 @@ public class JFrameEventos extends JFrame {
 
 	
 	private HashMap<String, String[]> fechasPorEvento = new HashMap<>();
-	private HashMap<String, boolean[]> reservasPorEvento = new HashMap<>();
-
+	private HashMap<String, ReservaEvento[]> reservasPorEvento = new HashMap<>();
+    private int siguienteId = 100;
 	
 	private String eventoSeleccionado = null;
 
@@ -72,6 +75,7 @@ public class JFrameEventos extends JFrame {
 
 	//DATOS HECHO CON IA
 
+	
     private void cargarDatos() {
         fechasPorEvento.put("Fiesta ibicenca",
                         new String[] { "03-07-2027", "10-07-2027", "17-07-2027", "24-07-2027", "31-07-2027" });
@@ -88,7 +92,7 @@ public class JFrameEventos extends JFrame {
 
         // Al principio todas las fechasestán libres (false = no reservada)
         for (String tipo : TIPOS_EVENTO) {
-                reservasPorEvento.put(tipo, new boolean[5]);
+            reservasPorEvento.put(tipo, new ReservaEvento[5]);
         }
 }
 		
@@ -180,7 +184,8 @@ public class JFrameEventos extends JFrame {
 		}
 		String fecha = fechasPorEvento.get(eventoSeleccionado)[posicion];
 		if (estaReservada(posicion)) {
-			lblFechas[posicion].setText(fecha + " - RESERVADO");
+            ReservaEvento r = reservasPorEvento.get(eventoSeleccionado)[posicion];
+            lblFechas[posicion].setText(fecha + " - RESERVADO (" + r.getCliente() + ")");
 			lblFechas[posicion].setBackground(COLOR_RESERVADO);
 		} else {
 			lblFechas[posicion].setText(fecha);
@@ -189,7 +194,8 @@ public class JFrameEventos extends JFrame {
 	}
 
 	private boolean estaReservada(int posicion) {
-		return reservasPorEvento.get(eventoSeleccionado)[posicion];
+		  return reservasPorEvento.get(eventoSeleccionado)[posicion] != null;
+
 	}
 
 	
@@ -215,10 +221,12 @@ public class JFrameEventos extends JFrame {
 				"¿Reservar " + eventoSeleccionado + " el " + fecha + " para " + cliente + "?", "Confirmar reserva",
 				JOptionPane.YES_NO_OPTION);
 
-		if (respuesta == JOptionPane.YES_OPTION) {
-			reservasPorEvento.get(eventoSeleccionado)[posicion] = true;
-		}
-		actualizarFecha(posicion);
+        if (respuesta == JOptionPane.YES_OPTION) {
+            // de momento DNI vacío y 1 persona; en el paso 3 lo pedirá el JDialog
+            Evento evento = new Evento(siguienteId, eventoSeleccionado, fecha, 1, 1.0);
+            siguienteId++;
+            reservasPorEvento.get(eventoSeleccionado)[posicion] = new ReservaEvento(evento, cliente, "");
+    }
 	}
 
 
