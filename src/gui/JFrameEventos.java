@@ -140,11 +140,16 @@ public class JFrameEventos extends JFrame {
 				
 				@Override
 				public void mouseEntered(MouseEvent e) {
-					if (!estaReservada(posicion)) {
-						lblFecha.setText("Reservar");
-						lblFecha.setCursor(new Cursor(Cursor.HAND_CURSOR));
-					}
-				}
+                    if (eventoSeleccionado == null) {
+                            return;
+                    }
+                    if (estaReservada(posicion)) {
+                            lblFecha.setText("Anular reserva");
+                    } else {
+                            lblFecha.setText("Reservar");
+                    }
+                    lblFecha.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
 
 				
 				@Override
@@ -156,8 +161,16 @@ public class JFrameEventos extends JFrame {
 				
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					reservarFecha(posicion);
-				}
+                    if (eventoSeleccionado == null) {
+                            return;
+                    }
+                    if (estaReservada(posicion)) {
+                            anularReserva(posicion);
+                    } else {
+                            reservarFecha(posicion);
+                    }
+            }
+
 			});
 
 			lblFechas[i] = lblFecha;
@@ -201,12 +214,6 @@ public class JFrameEventos extends JFrame {
     private void reservarFecha(int posicion) {
         String fecha = fechasPorEvento.get(eventoSeleccionado)[posicion];
 
-        if (estaReservada(posicion)) {
-                JOptionPane.showMessageDialog(this, "La fecha " + fecha + " ya está reservada", "Aviso",
-                                JOptionPane.WARNING_MESSAGE);
-                return;
-        }
-
         JDialogReservaEvento dialogo = new JDialogReservaEvento(this, siguienteId, eventoSeleccionado, fecha);
         dialogo.setVisible(true); // modal: el código se para aquí hasta que se cierre
 
@@ -214,6 +221,20 @@ public class JFrameEventos extends JFrame {
         if (nueva != null) {
                 siguienteId++;
                 reservasPorEvento.get(eventoSeleccionado)[posicion] = nueva;
+        }
+        actualizarFecha(posicion);
+}
+    // anular reserva 
+    private void anularReserva(int posicion) {
+        ReservaEvento r = reservasPorEvento.get(eventoSeleccionado)[posicion];
+
+        int respuesta = JOptionPane.showConfirmDialog(this,
+                        "¿Anular la reserva de " + r.getCliente() + " (DNI " + r.getDni() + ") para el "
+                                        + r.getEvento().getFecha() + "?",
+                        "Anular reserva", JOptionPane.YES_NO_OPTION);
+
+        if (respuesta == JOptionPane.YES_OPTION) {
+                reservasPorEvento.get(eventoSeleccionado)[posicion] = null;
         }
         actualizarFecha(posicion);
 }
