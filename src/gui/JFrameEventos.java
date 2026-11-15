@@ -1,6 +1,9 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Image;
+import javax.swing.ImageIcon;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -49,7 +52,12 @@ public class JFrameEventos extends JFrame {
 	private JLabel lblTitulo;
 	private JLabel lblEventoActual;
 	private JLabel[] lblFechas = new JLabel[5];
+	private JPanel panelCartas;
+    private CardLayout cardsFechas;
 
+ // para volver a la ventana principal
+    private JButton btnVolver;
+    private JFramePrincipal ventanaAnterior;
 	 private ReservaEvento reservaParaMontar = null;
      private HiloMontaje hiloMontaje;
      private JProgressBar barraMontaje;
@@ -57,11 +65,12 @@ public class JFrameEventos extends JFrame {
      private JButton btnMontar;
      private JButton btnParar;
 
-	
+     
 	
 	
 	//JFRAME
-	public JFrameEventos() {
+     public JFrameEventos(JFramePrincipal ventanaAnterior) {
+         this.ventanaAnterior = ventanaAnterior;
 
 		setTitle("Gestión de eventos");
 		setSize(900, 650);
@@ -74,10 +83,17 @@ public class JFrameEventos extends JFrame {
 		panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		
-		lblTitulo = new JLabel("¡Elige el evento!", SwingConstants.CENTER);
-		lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
-		panelPrincipal.add(lblTitulo, BorderLayout.NORTH);
 
+        lblTitulo = new JLabel("¡Elige el evento!", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
+
+        btnVolver = new JButton("Volver");
+        btnVolver.addActionListener(e -> volverAPantallaPrincipal());
+
+        JPanel panelSuperior = new JPanel(new BorderLayout());
+        panelSuperior.add(btnVolver, BorderLayout.WEST);
+        panelSuperior.add(lblTitulo, BorderLayout.CENTER);
+        panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
 	
 		panelPrincipal.add(crearPanelEventos(), BorderLayout.WEST);
 
@@ -205,7 +221,18 @@ public class JFrameEventos extends JFrame {
 			panelFechas.add(lblFecha);
 		}
 
-		panelCentro.add(panelFechas, BorderLayout.CENTER);
+		 // imagen que sale antes de elegir evento (IA)
+        ImageIcon iconoLogo = new ImageIcon("src/Resources/Images/Gemini_Generated_Image_p6xhrep6xhrep6xh.jpeg");
+        Image logoEscalado = iconoLogo.getImage().getScaledInstance(620, 346, Image.SCALE_SMOOTH);
+        JLabel lblImagen = new JLabel(new ImageIcon(logoEscalado), SwingConstants.CENTER);
+
+        cardsFechas = new CardLayout();
+        panelCartas = new JPanel(cardsFechas);
+        panelCartas.add(lblImagen, "IMAGEN");
+        panelCartas.add(panelFechas, "FECHAS");
+        cardsFechas.show(panelCartas, "IMAGEN"); // al abrir sale la imagen
+
+        panelCentro.add(panelCartas, BorderLayout.CENTER);
 		return panelCentro;
 	}
 
@@ -252,6 +279,8 @@ public class JFrameEventos extends JFrame {
 	
 	// pinta las 5 fechas del evento seleccionado
 	private void mostrarFechas() {
+        cardsFechas.show(panelCartas, "FECHAS"); // quita la imagen y enseña las fechas
+        lblEventoActual.setText("Evento: " + eventoSeleccionado);
 		lblEventoActual.setText("Evento: " + eventoSeleccionado);
 		for (int i = 0; i < lblFechas.length; i++) {
 			lblFechas[i].setVisible(true);
@@ -320,6 +349,19 @@ public class JFrameEventos extends JFrame {
             
         actualizarFecha(posicion);
 }
+    // boton volver, igual que el de julene en inventario
+    private void volverAPantallaPrincipal() {
+        // si el montaje está en marcha lo paro antes de salir
+        if (hiloMontaje != null) {
+            hiloMontaje.interrupt();
+        }
+        this.dispose();
+        if (ventanaAnterior != null) {
+            ventanaAnterior.toFront();
+        }
+    }
+    
+    
 	private class HiloMontaje extends Thread{
         //IA pasos del monjaje, productos de la clase de JFrameInventario asi cuadra con julene
 	

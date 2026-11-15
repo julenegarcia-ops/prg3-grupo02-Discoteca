@@ -94,7 +94,7 @@ public class JFramePrincipal extends JFrame {
         // Eventos de los botones
      
         btnEventos.addActionListener(e -> {
-            JFrameEventos ventana = new JFrameEventos();
+            JFrameEventos ventana = new JFrameEventos(JFramePrincipal.this);
             ventana.setVisible(true);
         });
         
