@@ -235,7 +235,39 @@ public class Jframereservados extends JFrame {
 			panelinf.add(confirmar, BorderLayout.SOUTH);
 			add(panelinf, BorderLayout.SOUTH);
 
+		
+			
 		}
+		
+		private void mostrarCategorias() {
+
+			JPanel panelcat = new JPanel(new GridLayout(1, 3, 15, 15));
+			panelcat.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+			panelcat.add(crearBotonCategoria("Bebidas Alcohólicas", recursosbebidas.CAT_ALCOHOL));
+			panelcat.add(crearBotonCategoria("Refrescos", recursosbebidas.CAT_REFRESCOS));
+			panelcat.add(crearBotonCategoria("Otros", recursosbebidas.CAT_OTROS));
+
+			panelcentro.add(panelcat, BorderLayout.CENTER);
+			panelcentro.revalidate();
+			panelcentro.repaint();
+		}
+
+		private JButton crearBotonCategoria(String titulo, String rutaImagen) {
+			JButton bottit = new JButton(titulo);
+			bottit.setFont(new Font("Arial", Font.BOLD, 14));
+			bottit.setIcon(recursosbebidas.obtenerIcono(rutaImagen, 110, 110));
+			bottit.setHorizontalTextPosition(JButton.CENTER);
+			bottit.setVerticalTextPosition(JButton.BOTTOM);
+			bottit.setBackground(Color.WHITE);
+			bottit.setFocusPainted(false);
+			bottit.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+			return bottit;
+		}
+		
+		
+		
+		
 	}
 
 	//clase del hilo.
