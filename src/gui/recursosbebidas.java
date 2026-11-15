@@ -6,6 +6,8 @@
 	import java.awt.image.BufferedImage;
 	import javax.swing.ImageIcon;
 	//Clase mayormente generada con IA.
+	
+	//las rutas cargadas a mano
 	public class recursosbebidas {
 
 		public static final String CARPETA_BASE = "./Resources/Images/";
@@ -23,24 +25,24 @@
 		public static final String RON = CARPETA_BASE + "ron.png";
 		public static final String WHISKY = CARPETA_BASE + "whisky.png";
 		public static final String GINEBRA = CARPETA_BASE + "ginebra.png";
-		public static final String TEQUILA = CARPETA_BASE + "tequila.png";
-		public static final String JAGER = CARPETA_BASE + "jager.png";
+		public static final String TEQUILA = CARPETA_BASE + "tekila.jpg";
+		public static final String JAGER = CARPETA_BASE + "jager.jpg";
 
 		public static final String COCA_COLA = CARPETA_BASE + "cocacola.png";
 		public static final String COCA_ZERO = CARPETA_BASE + "cocazero.png";
-		public static final String FANTA_NARANJA = CARPETA_BASE + "fantanaranja.png";
-		public static final String FANTA_LIMON = CARPETA_BASE + "fantalimon.png";
-		public static final String SPRITE = CARPETA_BASE + "sprite.png";
+		public static final String FANTA_NARANJA = CARPETA_BASE + "fanta.jpeg";
+		public static final String FANTA_LIMON = CARPETA_BASE + "fantal.jpeg";
+		public static final String SPRITE = CARPETA_BASE + "sprite.jpeg";
 		public static final String RED_BULL = CARPETA_BASE + "redbull.png";
-		public static final String MONSTER = CARPETA_BASE + "monster.png";
-		public static final String RED_BULL_SF = CARPETA_BASE + "redbullsf.png";
+		public static final String MONSTER = CARPETA_BASE + "monster.jpg";
+		public static final String RED_BULL_SF = CARPETA_BASE + "redbull.jpeg";
 
 		// Productos: Otros
 		public static final String CERVEZA_SIN = CARPETA_BASE + "cervezasin.png";
-		public static final String AGUA = CARPETA_BASE + "agua.png";
-		public static final String ZUMO_PINA = CARPETA_BASE + "zumo.png";
+		public static final String AGUA = CARPETA_BASE + "agua.jpeg";
+		public static final String ZUMO_PINA = CARPETA_BASE + "zumo.jpg";
 		public static final String TONICA = CARPETA_BASE + "tonica.png";
-		public static final String HIELO = CARPETA_BASE + "hielo.png";
+		public static final String HIELO = CARPETA_BASE + "hielo.jpg";
 
 		// Método utilitario reutilizable para cargar y escalar cualquier imagen de forma segura
 		public static ImageIcon obtenerIcono(String ruta, int ancho, int alto) {

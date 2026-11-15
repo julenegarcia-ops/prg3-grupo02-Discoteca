@@ -6,20 +6,18 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -114,7 +112,6 @@ public class Jframereservados extends JFrame {
 		private JLabel labelseleccionado;
 		private String productoseleccionado = null;
 
-		private JComboBox<String> productos;
 		private JSpinner cantidad;
 		private JButton confirmar;
 		private String nombremesa;
@@ -135,6 +132,7 @@ public class Jframereservados extends JFrame {
 			
 			panelcentro =  new JPanel(new BorderLayout());
 			panelcentro.setBorder(BorderFactory.createTitledBorder("Menu para " + nombremesa));
+			mostrarCategorias();
 			add(panelcentro, BorderLayout.CENTER);
 			
 			//inf
@@ -151,15 +149,7 @@ public class Jframereservados extends JFrame {
 			
 			
 			labelseleccionado.setForeground(new Color(0, 102, 204));
-			productos = new JComboBox<>(new String[] { "Coca-Cola - 3.0€", "Coca-Cola Zero - 3.0€",
-					"Fanta Naranja - 3.0€", "Fanta Limón - 3.0€", "Sprite - 3.0€", "Red Bull - 4.5€", "Monster - 4.0€",
-					"Red Bull Sugarfree - 4.5€", "Heineken - 4.0€", "Estrella Galicia - 3.5€", "Mahou - 3.5€",
-					"Cerveza sin alcohol - 3.0€", "Vodka Absolut - 8.0€", "Ron Barceló - 8.0€",
-					"Whisky Ballantines - 9.0€", "Ginebra Beefeater - 9.0€", "Tequila José Cuervo - 7.0€",
-					"Jägermeister - 6.0€", "Agua mineral - 2.0€", "Zumo de piña - 3.0€", "Tónica - 2.5€", "Hielo - 1.0€"
-
-			});
-
+			
 			JLabel cantidadlabel = new JLabel("Cantidad:", JLabel.RIGHT);
 			cantidadlabel.setFont(new Font("Arial", Font.BOLD, 13));
 
@@ -224,7 +214,7 @@ public class Jframereservados extends JFrame {
 			        
 			        panelbarra.repaint();
 			        SwingUtilities.getWindowAncestor(PanelPedido.this).dispose();
-			        String producto = (String) productos.getSelectedItem();
+			        String producto = productoseleccionado;
 					int cantidd = (int) cantidad.getValue();
 					hilocamarero = new HiloCamarero(mesa, tipo, producto, cantidd);
 					hilocamarero.start();
@@ -241,19 +231,56 @@ public class Jframereservados extends JFrame {
 		
 		private void mostrarCategorias() {
 
+			
+			panelcentro.removeAll(); 
 			JPanel panelcat = new JPanel(new GridLayout(1, 3, 15, 15));
 			panelcat.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+			
+			
+			String[][] prodAlcohol = {
+					{ "Heineken - 4.0€", recursosbebidas.HEINEKEN },
+					{ "Estrella Galicia - 3.5€", recursosbebidas.ESTRELLA },
+					{ "Mahou - 3.5€", recursosbebidas.MAHOU },
+					{ "Vodka Absolut - 8.0€", recursosbebidas.VODKA },
+					{ "Ron Barceló - 8.0€", recursosbebidas.RON },
+					{ "Whisky Ballantines - 9.0€", recursosbebidas.WHISKY },
+					{ "Ginebra Beefeater - 9.0€", recursosbebidas.GINEBRA },
+					{ "Tequila José Cuervo - 7.0€", recursosbebidas.TEQUILA },
+					{ "Jägermeister - 6.0€", recursosbebidas.JAGER }
+				};
 
-			panelcat.add(crearBotonCategoria("Bebidas Alcohólicas", recursosbebidas.CAT_ALCOHOL));
-			panelcat.add(crearBotonCategoria("Refrescos", recursosbebidas.CAT_REFRESCOS));
-			panelcat.add(crearBotonCategoria("Otros", recursosbebidas.CAT_OTROS));
+				String[][] prodRefrescos = {
+					{ "Coca-Cola - 3.0€", recursosbebidas.COCA_COLA },
+					{ "Coca-Cola Zero - 3.0€", recursosbebidas.COCA_ZERO },
+					{ "Fanta Naranja - 3.0€", recursosbebidas.FANTA_NARANJA },
+					{ "Fanta Limón - 3.0€", recursosbebidas.FANTA_LIMON },
+					{ "Sprite - 3.0€", recursosbebidas.SPRITE },
+					{ "Red Bull - 4.5€", recursosbebidas.RED_BULL },
+					{ "Monster - 4.0€", recursosbebidas.MONSTER },
+					{ "Red Bull Sugarfree - 4.5€", recursosbebidas.RED_BULL_SF }
+				};
+
+				String[][] prodOtros = {
+					{ "Cerveza sin alcohol - 3.0€", recursosbebidas.CERVEZA_SIN },
+					{ "Agua mineral - 2.0€", recursosbebidas.AGUA },
+					{ "Zumo de piña - 3.0€", recursosbebidas.ZUMO_PINA },
+					{ "Tónica - 2.5€", recursosbebidas.TONICA },
+					{ "Hielo - 1.0€", recursosbebidas.HIELO }
+				};
+			
+			
+			
+
+			panelcat.add(crearBotonCategoria("Bebidas Alcohólicas", recursosbebidas.CAT_ALCOHOL,prodAlcohol));
+			panelcat.add(crearBotonCategoria("Refrescos", recursosbebidas.CAT_REFRESCOS,prodRefrescos));
+			panelcat.add(crearBotonCategoria("Otros", recursosbebidas.CAT_OTROS,prodOtros));
 
 			panelcentro.add(panelcat, BorderLayout.CENTER);
 			panelcentro.revalidate();
 			panelcentro.repaint();
 		}
 
-		private JButton crearBotonCategoria(String titulo, String rutaImagen) {
+		private JButton crearBotonCategoria(String titulo, String rutaImagen, String[][] tipobebida) {
 			JButton bottit = new JButton(titulo);
 			bottit.setFont(new Font("Arial", Font.BOLD, 14));
 			bottit.setIcon(recursosbebidas.obtenerIcono(rutaImagen, 110, 110));
@@ -262,8 +289,54 @@ public class Jframereservados extends JFrame {
 			bottit.setBackground(Color.WHITE);
 			bottit.setFocusPainted(false);
 			bottit.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+			
+			bottit.addActionListener(e -> mostrarproductos (titulo, tipobebida));
 			return bottit;
 		}
+
+		private void mostrarproductos(String titulo, String[][] tipobebida) {
+			panelcentro.removeAll();
+
+			JPanel volver = new JPanel(new BorderLayout());
+			JButton btnVolver = new JButton("← Volver");
+			btnVolver.setFont(new Font("Arial", Font.BOLD, 12));
+			btnVolver.addActionListener(e -> mostrarCategorias());
+
+			JLabel lblTitulo = new JLabel(titulo, JLabel.CENTER);
+			lblTitulo.setFont(new Font("Arial", Font.BOLD, 15));
+
+			volver.add(btnVolver, BorderLayout.WEST);
+			volver.add(lblTitulo, BorderLayout.CENTER);
+			panelcentro.add(volver, BorderLayout.NORTH);
+
+			JPanel gridProductos = new JPanel(new GridLayout(0, 3, 10, 10));
+			gridProductos.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+			for (String[] prod : tipobebida) {
+				final String nombreprecio = prod[0];
+				String rutaImg = prod[1];
+
+				JButton botonprod = new JButton("<html><center>" + nombreprecio.replace(" - ", "<br><b>") + "</b></center></html>");
+				botonprod.setIcon(recursosbebidas.obtenerIcono(rutaImg, 65, 65));
+				botonprod.setHorizontalTextPosition(JButton.CENTER);
+				botonprod.setVerticalTextPosition(JButton.BOTTOM);
+				botonprod.setBackground(Color.WHITE);
+				botonprod.setFocusPainted(false);
+
+				botonprod.addActionListener(e -> {
+					productoseleccionado = nombreprecio;
+					labelseleccionado.setText("Seleccionado: " + productoseleccionado);
+				});
+
+				gridProductos.add(botonprod);
+			}
+
+			JScrollPane scroll = new JScrollPane(gridProductos);
+			scroll.getVerticalScrollBar().setUnitIncrement(16);
+			panelcentro.add(scroll, BorderLayout.CENTER);
+
+			panelcentro.revalidate();
+			panelcentro.repaint();		}
 		
 		
 		
@@ -448,7 +521,7 @@ public class Jframereservados extends JFrame {
 		});
 
 		return mesa;
-	}
+}
 }
 
 //IDEAS DE MEJORA DE CÓDIGO A FUTURO
