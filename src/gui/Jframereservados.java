@@ -110,35 +110,47 @@ public class Jframereservados extends JFrame {
 	public class PanelPedido extends JPanel {
 
 		private static final long serialVersionUID = 1L;
+		private JPanel panelcentro;
+		private JLabel labelseleccionado;
+		private String productoseleccionado = null;
 
 		private JComboBox<String> productos;
 		private JSpinner cantidad;
 		private JButton confirmar;
+		private String nombremesa;
 
 		public PanelPedido(String nombre, JButton mesa, TipoMesa tipo) {
-			setLayout(new BorderLayout(15, 15));
+			this.nombremesa = nombre;
+			setLayout(new BorderLayout(10, 10));
 			JPanel panelogo = new JPanel(new FlowLayout(FlowLayout.CENTER));
 			JLabel logo = new JLabel("", JLabel.CENTER);
-
-			/// Reescalado de la Imagen generado con IA:
-			ImageIcon imagen1 = new ImageIcon("./Resources/Images/Gemini_Generated_Image_p6xhrep6xhrep6xh.jpeg");
-			Image imgEscalada = imagen1.getImage().getScaledInstance(450, 140, Image.SCALE_SMOOTH);
-			logo.setIcon(new ImageIcon(imgEscalada));
-			////
-
+			logo.setIcon(recursosbebidas.obtenerIcono(recursosbebidas.LOGO_DISCOTECA, 520, 100));
 			panelogo.add(logo);
 			panelogo.setBackground(Color.BLACK);
 			add(panelogo, BorderLayout.NORTH);
+			
+		
 
-			JPanel panelcont = new JPanel(new BorderLayout(10, 15));
-			panelcont.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+			//parte central
+			
+			panelcentro =  new JPanel(new BorderLayout());
+			panelcentro.setBorder(BorderFactory.createTitledBorder("Menu para " + nombremesa));
+			add(panelcentro, BorderLayout.CENTER);
+			
+			//inf
+			
+			
+			JPanel panelinf = new JPanel(new BorderLayout(10, 10));
+			panelinf.setBorder(BorderFactory.createEmptyBorder(5, 15, 15, 15));
 
-			JPanel panelprod = new JPanel(new GridLayout(2, 2, 10, 15));
-			panelprod.setBorder(BorderFactory.createTitledBorder("Pedido para " + nombre));
 
-			JLabel producto = new JLabel("Producto:", JLabel.RIGHT);
-			producto.setFont(new Font("Arial", Font.BOLD, 13));
-
+			//resumen
+			JPanel resumen = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+			labelseleccionado = new JLabel("Aún no has seleccionado nada");
+			labelseleccionado.setFont(new Font("Arial", Font.BOLD, 14));
+			
+			
+			labelseleccionado.setForeground(new Color(0, 102, 204));
 			productos = new JComboBox<>(new String[] { "Coca-Cola - 3.0€", "Coca-Cola Zero - 3.0€",
 					"Fanta Naranja - 3.0€", "Fanta Limón - 3.0€", "Sprite - 3.0€", "Red Bull - 4.5€", "Monster - 4.0€",
 					"Red Bull Sugarfree - 4.5€", "Heineken - 4.0€", "Estrella Galicia - 3.5€", "Mahou - 3.5€",
@@ -151,15 +163,13 @@ public class Jframereservados extends JFrame {
 			JLabel cantidadlabel = new JLabel("Cantidad:", JLabel.RIGHT);
 			cantidadlabel.setFont(new Font("Arial", Font.BOLD, 13));
 
+
 			cantidad = new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
-
-			panelprod.add(producto);
-			panelprod.add(productos);
-			panelprod.add(cantidadlabel);
-			panelprod.add(cantidad);
-
-			panelcont.add(panelprod, BorderLayout.CENTER);
-
+			resumen.add(labelseleccionado);
+			resumen.add(cantidadlabel);
+			resumen.add(cantidad);
+			
+			
 			confirmar = new JButton("Nuevo Pedido");
 			confirmar.setFont(new Font("Arial", Font.BOLD, 13));
 			confirmar.setPreferredSize(new Dimension(0, 38));
@@ -168,6 +178,13 @@ public class Jframereservados extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					if (productoseleccionado == null) {
+						JOptionPane.showMessageDialog(PanelPedido.this,
+								"Por favor, selecciona primero un producto del menú.",
+								"Falta producto", JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					
 					camarero.setVisible(true);
 					panelbarra.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 15));
 					// No creamos el boton iniciar porque asumimos que al "aceptar pedido", ya has
@@ -214,8 +231,9 @@ public class Jframereservados extends JFrame {
 				}
 			});
 
-			panelcont.add(confirmar, BorderLayout.SOUTH);
-			add(panelcont, BorderLayout.CENTER);
+			panelinf.add(resumen, BorderLayout.NORTH);
+			panelinf.add(confirmar, BorderLayout.SOUTH);
+			add(panelinf, BorderLayout.SOUTH);
 
 		}
 	}
@@ -385,13 +403,15 @@ public class Jframereservados extends JFrame {
 																											// del
 																											// JDialog.
 				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				dialog.setSize(450, 350);
+				dialog.setSize(620, 540);
 				dialog.setLocationRelativeTo(Jframereservados.this); // pregunta al IA sobre porqué el .this va al
 																		// final.
 
 				PanelPedido panel = new PanelPedido(nombre, mesa, tipo);
 				dialog.setContentPane(panel);
 				dialog.setVisible(true);
+				
+				
 			}
 		});
 
