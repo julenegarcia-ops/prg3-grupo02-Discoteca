@@ -29,12 +29,10 @@ public class JFrameFacturas extends JFrame {
     private JLabel lblBase, lblBaseDato, lblIVA, lblIVADato;
     private JLabel lblTotal, lblTotalDato;
     
-    // Solo necesitamos nombre y cantidad
     private JLabel lblProdNombre, lblProdCantidad;
     private JTextField txtProdNombre, txtProdCantidad;
     private JButton btnAnadirProducto;
 
-    // Contador correlativo para el número de factura
     private int contadorFactura = 1;
 
     private JTextField txtNumeroFactura, txtFecha, txtHora;
@@ -44,13 +42,14 @@ public class JFrameFacturas extends JFrame {
     private ModeloTablaFacturas modelo;
     private JTable tabla;
     private JScrollPane spConsumo;
-    private JButton btnImprimir, btnGmail, btnNuevaFactura, btnCerrar;
+    private JButton btnImprimir, btnGmail, btnNuevaFactura, btnVolver, btnCerrar;
 
     public JFrameFacturas() {
         super();
         setSize(900, 650);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Cambiado a DISPOSE_ON_CLOSE para que al cerrar con la 'X' no mate la ventana principal
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         lProducto = new ArrayList<Producto>();
         cargarCatalogo();
@@ -246,6 +245,16 @@ public class JFrameFacturas extends JFrame {
                 modelo.fireTableDataChanged();
                 calcularTotales();
                 txtMesa.requestFocus();
+            }
+        });
+
+        // Nuevo botón para volver al panel principal
+        btnVolver = new JButton("Volver");
+        pBotones.add(btnVolver);
+        btnVolver.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
             }
         });
 
