@@ -15,7 +15,7 @@
 		public static final String LOGO_DISCOTECA = CARPETA_BASE + "LogoDiscoteca+.jpeg";
 
 		public static final String CAT_ALCOHOL = CARPETA_BASE + "cat_alcohol.png";
-		public static final String CAT_REFRESCOS = CARPETA_BASE + "cat_refrescos.png";
+		public static final String CAT_REFRESCOS = CARPETA_BASE + "refrescos.png";
 		public static final String CAT_OTROS = CARPETA_BASE + "cat_otros.png";
 
 		public static final String HEINEKEN = CARPETA_BASE + "heineken.png";
@@ -32,7 +32,7 @@
 		public static final String COCA_ZERO = CARPETA_BASE + "cocazero.png";
 		public static final String FANTA_NARANJA = CARPETA_BASE + "fanta.jpeg";
 		public static final String FANTA_LIMON = CARPETA_BASE + "fantal.jpeg";
-		public static final String SPRITE = CARPETA_BASE + "sprite.jpeg";
+		public static final String SPRITE = CARPETA_BASE + "sprite.jpg";
 		public static final String RED_BULL = CARPETA_BASE + "redbull.png";
 		public static final String MONSTER = CARPETA_BASE + "monster.jpg";
 		public static final String RED_BULL_SF = CARPETA_BASE + "redbull.jpeg";
