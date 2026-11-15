@@ -8,11 +8,15 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import java.awt.event.WindowAdapter; 
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,6 +50,16 @@ public class JFrameEventos extends JFrame {
 	private JLabel lblEventoActual;
 	private JLabel[] lblFechas = new JLabel[5];
 
+	 private ReservaEvento reservaParaMontar = null;
+     private HiloMontaje hiloMontaje;
+     private JProgressBar barraMontaje;
+     private JLabel lblEstadoMontaje;
+     private JButton btnMontar;
+     private JButton btnParar;
+
+	
+	
+	
 	//JFRAME
 	public JFrameEventos() {
 
@@ -69,7 +83,21 @@ public class JFrameEventos extends JFrame {
 
 		
 		panelPrincipal.add(crearPanelFechas(), BorderLayout.CENTER);
+		panelPrincipal.add(crearPanelMontaje(), BorderLayout.SOUTH);
+		
+		//esto es por si cierran la ventana con el montaje del evento (mi hilo) en marcha, asi se para
+		 addWindowListener(new WindowAdapter() {
+             @Override
+             public void windowClosing(WindowEvent e) {
+                     if (hiloMontaje != null) {
+                             hiloMontaje.interrupt();
+                     }
+             }
+     });
 
+		
+		
+		
 		add(panelPrincipal);
 	}
 
@@ -181,6 +209,47 @@ public class JFrameEventos extends JFrame {
 		return panelCentro;
 	}
 
+	private JPanel crearPanelMontaje() {
+		JPanel panelMontaje = new JPanel(new BorderLayout (5,5));
+		panelMontaje.setBorder(BorderFactory.createTitledBorder("Montaje del evento"));
+		lblEstadoMontaje = new JLabel ("Reserva una fecha para montar el evento",SwingConstants.CENTER);
+        barraMontaje = new JProgressBar(0, 100);
+        barraMontaje.setStringPainted(true);
+        
+        btnMontar = new JButton("Montar evento");
+        btnParar = new JButton("Detener montaje");
+        btnMontar.setEnabled(false);
+        btnParar.setEnabled(false);
+        
+        btnMontar.addActionListener(e -> {
+            barraMontaje.setValue(0);
+            btnMontar.setEnabled(false);
+            btnParar.setEnabled(true);
+            hiloMontaje = new HiloMontaje(reservaParaMontar);
+            hiloMontaje.start();
+    });
+
+    btnParar.addActionListener(e -> {
+            if (hiloMontaje != null) {
+                    hiloMontaje.interrupt();
+            }
+            btnParar.setEnabled(false);
+    });
+
+    JPanel panelBotones = new JPanel();
+    panelBotones.add(btnMontar);
+    panelBotones.add(btnParar);
+
+    panelMontaje.add(lblEstadoMontaje, BorderLayout.NORTH);
+    panelMontaje.add(barraMontaje, BorderLayout.CENTER);
+    panelMontaje.add(panelBotones, BorderLayout.SOUTH);
+    return panelMontaje;
+}
+	
+	
+	
+	
+	
 	// pinta las 5 fechas del evento seleccionado
 	private void mostrarFechas() {
 		lblEventoActual.setText("Evento: " + eventoSeleccionado);
@@ -221,24 +290,83 @@ public class JFrameEventos extends JFrame {
         if (nueva != null) {
                 siguienteId++;
                 reservasPorEvento.get(eventoSeleccionado)[posicion] = nueva;
+                reservaParaMontar = nueva;
+                lblEstadoMontaje.setText("Pendiente de montar: " + nueva);
+                btnMontar.setEnabled(hiloMontaje == null || !hiloMontaje.isAlive());
         }
         actualizarFecha(posicion);
 }
     // anular reserva 
     private void anularReserva(int posicion) {
         ReservaEvento r = reservasPorEvento.get(eventoSeleccionado)[posicion];
-
+        if (hiloMontaje != null && hiloMontaje.isAlive() && hiloMontaje.getReserva() == r) {
+            JOptionPane.showMessageDialog(this, "No se puede anular: se está montando ese evento", "Aviso",
+                            JOptionPane.WARNING_MESSAGE);
+            return;
+    }
         int respuesta = JOptionPane.showConfirmDialog(this,
                         "¿Anular la reserva de " + r.getCliente() + " (DNI " + r.getDni() + ") para el "
                                         + r.getEvento().getFecha() + "?",
                         "Anular reserva", JOptionPane.YES_NO_OPTION);
 
         if (respuesta == JOptionPane.YES_OPTION) {
-                reservasPorEvento.get(eventoSeleccionado)[posicion] = null;
-        }
+            reservasPorEvento.get(eventoSeleccionado)[posicion] = null;
+            if (r == reservaParaMontar) {
+                    reservaParaMontar = null;
+                    btnMontar.setEnabled(false);
+                    lblEstadoMontaje.setText("Reserva anulada");
+            }
+    }
+            
         actualizarFecha(posicion);
 }
+	private class HiloMontaje extends Thread{
+        //IA pasos del monjaje, productos de la clase de JFrameInventario asi cuadra con julene
 	
+		  private final String[] PASOS = { "Montando luces y escenario", "Probando el sonido del DJ",
+                  "Preparando la barra (Hielo, Agua mineral, Coca-Cola, Heineken)", "Colocando seguridad en la puerta",
+                  "Limpiando la pista", "Abriendo puertas" };
+		  
+		  private ReservaEvento reserva;
+		  public HiloMontaje(ReservaEvento reserva) {
+			  this.reserva = reserva;
+	  }
+		  public ReservaEvento getReserva() {
+              return reserva;
+      }
 
+      @Override
+      public void run() {
+          for (int i = 0; i < PASOS.length && !isInterrupted(); i++) {
+                  String paso = PASOS[i];
+                  SwingUtilities.invokeLater(() -> lblEstadoMontaje.setText(reserva + ": " + paso + "..."));
 
+                  try {
+                          Thread.sleep(1500);
+                  } catch (InterruptedException e) {
+                          interrupt(); // el catch borra la marca, la vuelvo a poner
+                          break;
+                  }
+
+                  int progreso = (i + 1) * 100 / PASOS.length;
+                  SwingUtilities.invokeLater(() -> barraMontaje.setValue(progreso));
+          }
+
+          boolean terminado = !isInterrupted();
+          // el hilo no toca la ventana directamente: se lo pide al EDT
+          SwingUtilities.invokeLater(() -> {
+                  if (terminado) {
+                          lblEstadoMontaje.setText("¡" + reserva.getEvento().getNombre() + " del "
+                                          + reserva.getEvento().getFecha() + " listo!");
+                  } else {
+                          lblEstadoMontaje.setText("Montaje detenido");
+                  }
+                  btnMontar.setEnabled(reservaParaMontar != null);
+                  btnParar.setEnabled(false);
+          });
+  }
 }
+
+
+	}
+
