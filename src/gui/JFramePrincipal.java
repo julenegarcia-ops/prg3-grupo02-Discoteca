@@ -1,9 +1,13 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -18,12 +22,27 @@ public class JFramePrincipal extends JFrame {
     public JFramePrincipal() {
 
         setTitle("Gestión de la Discoteca");
-        setSize(800, 500);
+        setSize(640, 680);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        
+        //Colores
+        Color azulOscuro = new Color(24, 28, 50);
+        Color borde = new Color(215, 215, 222);
 
         // Panel principal
-        JPanel panelPrincipal = new JPanel(new BorderLayout(20, 20));
+        JPanel panelPrincipal = new JPanel(new BorderLayout(15, 15));
+        
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
+        JPanel panelCabecera = new JPanel(new BorderLayout(0, 12));
+        panelCabecera.setOpaque(false);
+        
+        ImageIcon fotoDiscoteca = new ImageIcon("Resources/Images/LogoDiscoteca+.jpeg");
+        //Para que escalone la imagen esta generado por IA
+        Image fotoEscalada = fotoDiscoteca.getImage().getScaledInstance(-1, 170, Image.SCALE_SMOOTH);
+        JLabel lblFoto = new JLabel(new ImageIcon(fotoEscalada), SwingConstants.CENTER);
+        panelCabecera.add(lblFoto, BorderLayout.CENTER);
 
         // Título
         JLabel lblTitulo = new JLabel(
@@ -31,22 +50,43 @@ public class JFramePrincipal extends JFrame {
                 SwingConstants.CENTER
         );
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 26));
+        
+        lblTitulo.setForeground(azulOscuro);
+        panelCabecera.add(lblTitulo, BorderLayout.SOUTH);
 
-        panelPrincipal.add(lblTitulo, BorderLayout.NORTH);
+        panelPrincipal.add(panelCabecera, BorderLayout.NORTH);
 
         // Panel de botones
-        JPanel panelBotones = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panelBotones = new JPanel(new GridLayout(3, 1, 10, 10));
 
-        JButton btnEventos = new JButton("Gestión de eventos");
-        JButton btnEntradas = new JButton("Venta de entradas");
-        JButton btnInventario = new JButton("Inventario");
-        JButton btnFacturas = new JButton("Facturas");
-        JButton btnVIP = new JButton("Clientes VIP y palcos");
+        JButton btnEventos = new JButton("Gestión de eventos", new ImageIcon("Resources/Images/eventos.png"));
+        JButton btnEntradas = new JButton("Venta de entradas", new ImageIcon("Resources/Images/entradas.png"));
+        JButton btnInventario = new JButton("Inventario",new ImageIcon("Resources/Images/inventario.png"));
+        JButton btnFacturas = new JButton("Facturas",new ImageIcon("Resources/Images/facturas.png"));
+        JButton btnVIP = new JButton("Clientes VIP y palcos", new ImageIcon("Resources/Images/vip.png"));
 
-        panelBotones.add(btnEventos);
-        panelBotones.add(btnEntradas);
-        panelBotones.add(btnInventario);
-        panelBotones.add(btnFacturas);
+        JButton[] botones = { btnEventos, btnEntradas, btnInventario, btnFacturas, btnVIP };
+
+        for (JButton b : botones) {
+            b.setFont(new Font("Arial", Font.BOLD, 17));
+            b.setForeground(azulOscuro);
+            b.setOpaque(true);
+            b.setBorder(BorderFactory.createLineBorder(borde));
+            b.setVerticalTextPosition(SwingConstants.BOTTOM);
+            b.setHorizontalTextPosition(SwingConstants.CENTER);
+ 
+        }
+        
+        JPanel fila1 = new JPanel(new GridLayout(1, 2, 10, 0));
+        fila1.add(btnEventos);
+        fila1.add(btnEntradas);
+
+        JPanel fila2 = new JPanel(new GridLayout(1, 2, 10, 0));
+        fila2.add(btnInventario);
+        fila2.add(btnFacturas);
+        
+        panelBotones.add(fila1);
+        panelBotones.add(fila2);
         panelBotones.add(btnVIP);
 
         panelPrincipal.add(panelBotones, BorderLayout.CENTER);
