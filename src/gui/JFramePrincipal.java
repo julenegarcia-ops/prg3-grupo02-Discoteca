@@ -64,7 +64,7 @@ public class JFramePrincipal extends JFrame {
         });
 
         btnInventario.addActionListener(e -> {  
-        	JFrameInventario ventana = new JFrameInventario();
+        	JFrameInventario ventana = new JFrameInventario(JFramePrincipal.this);
         	ventana.setVisible(true);
         	
         });

@@ -2,6 +2,8 @@ package gui;
 
 
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -9,7 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -21,6 +28,13 @@ import javax.swing.table.DefaultTableModel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableCellRenderer;
@@ -47,8 +61,26 @@ public class JFrameInventario extends JFrame{
 
 	// Thread que simulará el consumo de los productos
 	private HiloConsumo hiloConsumo;
+	
+	//Para volver a la ventana principal
+	private JButton btnVolver;
+	private JFramePrincipal ventanaAnterior;
+	
+	// Colores tanto para decorar como para el stock.
+	private static final Color MORADO = new Color(124, 58, 237);
+	private static final Color BARRA_FONDO = new Color(232, 230, 240);
+	private static final Color VERDE = new Color(34, 160, 80);
+	private static final Color AMBAR = new Color(230, 160, 20);
+	private static final Color ROJO = new Color(220, 60, 60);
+	private static final Color OK_FONDO = new Color(214, 240, 222);
+	private static final Color OK_TEXTO = new Color(30, 120, 60);
+	private static final Color BAJO_FONDO = new Color(253, 236, 180);
+	private static final Color BAJO_TEXTO = new Color(150, 100, 10);
+	private static final Color AGOTADO_FONDO = new Color(250, 215, 215);
+	private static final Color AGOTADO_TEXTO = new Color(180, 40, 40);
 
-	public JFrameInventario() {
+	public JFrameInventario(JFramePrincipal ventanaAnterior) {
+		this.ventanaAnterior = ventanaAnterior;
 		
 		//Generado con IA
 		// Refrescos
@@ -98,7 +130,7 @@ public class JFrameInventario extends JFrame{
 		// Cabecera del modelo de datos
 		Vector<String> cabeceraProductos = new Vector<String>(
 		        Arrays.asList("ID", "NOMBRE", "CATEGORÍA",
-		                      "PRECIO", "STOCK", "STOCK MÍNIMO"));
+		                      "PRECIO", "STOCK", "STOCK MÍNIMO", "ESTADO"));
 
 		// Creo el  modelo
 
@@ -135,29 +167,19 @@ public class JFrameInventario extends JFrame{
 		        } else {
 		            result.setText("");
 		        }
-		       
-		        // Obtener el stock y el stock mínimo
-
-		        int stock = (int) table.getValueAt(row, 4);
-		        int stockmin = (int) table.getValueAt(row, 5);
-
+		        
+		        result.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
 		        result.setOpaque(true);
+		       
+
 
 		        // Coloreo según el stock
 		        // Si la fila está seleccionada
 		        if (isSelected) { 
 		            result.setBackground(table.getSelectionBackground());
 		            result.setForeground(table.getSelectionForeground());
-		        }else if (stock == 0) { //Rojo, cuando no hay stock del producto
-		            result.setBackground(new Color(255, 180, 180));
-
-		        } else if (stock <= stockmin) { 
-		        	//Amarillo - hay stock pero menos que el sotck mínimo que debería haber
-		            result.setBackground(new Color(255, 240, 170));
-
-		        } else { 
-		        	//Verde, hay stock y es mayor que el stock mínimo
-		            result.setBackground(new Color(210, 245, 210));
+		        }else {
+		        	result.setBackground(Color.WHITE);
 		        }
 		        return result;
 		    
@@ -168,6 +190,24 @@ public class JFrameInventario extends JFrame{
 		tablaProductos.setDefaultRenderer(Object.class, mirenderer);
 		
 		tablaProductos.getTableHeader().setReorderingAllowed(false);
+		
+		tablaProductos.getColumnModel().getColumn(4).setCellRenderer(new BarraStockRenderer());
+		tablaProductos.getColumnModel().getColumn(6).setCellRenderer(new EstadoRenderer());
+		
+		
+		tablaProductos.setRowHeight(34);
+		tablaProductos.setShowGrid(false);
+		
+		tablaProductos.setShowHorizontalLines(true);
+		tablaProductos.setGridColor(new Color(235, 233, 242));
+		// Fila seleccionada en lila suave (como en la segunda imagen)
+		tablaProductos.setSelectionBackground(new Color(240, 236, 252));
+		tablaProductos.setSelectionForeground(Color.BLACK);
+		tablaProductos.setIntercellSpacing(new Dimension(0, 1));
+		int[] anchos = {40, 190, 120, 70, 120, 110, 100};
+		for (int i = 0; i < anchos.length; i++) {
+		    tablaProductos.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
+		}
 		
 		// Sólo permito la elección de una sola fila de la tabla
 		this.tablaProductos.setSelectionMode(
@@ -184,6 +224,7 @@ public class JFrameInventario extends JFrame{
 		    fila.add(p.getPrecio());
 		    fila.add(p.getStock());
 		    fila.add(p.getStockmin());
+		    fila.add(null);
 
 		    this.modeloDatosProductos.addRow(fila);
 		}
@@ -321,19 +362,7 @@ public class JFrameInventario extends JFrame{
 
 					if (fila != -1) {
 
-						int id = (int) tablaProductos.getValueAt(fila, 0);
-
-						String nombre = (String) tablaProductos.getValueAt(fila, 1);
-
-						int stock = (int) tablaProductos.getValueAt(fila, 4);
-
-						JOptionPane.showMessageDialog(
-								JFrameInventario.this,
-								"ID: " + id
-								+ "\nProducto: " + nombre
-								+ "\nStock: " + stock,
-								"Información del producto",
-								JOptionPane.INFORMATION_MESSAGE);
+						mostrarInfoProducto(fila);
 					}
 				}
 			}
@@ -383,6 +412,18 @@ public class JFrameInventario extends JFrame{
 		        new TitledBorder("Lista de productos"));
 
 		this.tablaProductos.setFillsViewportHeight(true);
+		
+		btnVolver = new JButton("Volver"); 
+		
+		btnVolver.addActionListener(e -> volverAPantallaPrincipal());
+
+		JPanel panelSuperior = new JPanel(new BorderLayout());
+		panelSuperior.add(btnVolver, BorderLayout.WEST);
+		// Línea morada debajo de la cabecera
+		panelSuperior.setBorder(BorderFactory.createCompoundBorder(
+		        BorderFactory.createMatteBorder(0, 0, 3, 0, MORADO),
+		        BorderFactory.createEmptyBorder(0, 0, 10, 0)));
+		principal.add(panelSuperior, BorderLayout.NORTH);
 
 		// Añado los  componentes
 
@@ -409,6 +450,8 @@ public class JFrameInventario extends JFrame{
 
 		// Añado panel inferior
 		principal.add(panelInferior, BorderLayout.SOUTH);
+		
+		principal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		// Añado el panel principal al JFrame
 		this.add(principal);
@@ -433,7 +476,306 @@ public class JFrameInventario extends JFrame{
 		//FIN con IA
 	}
 	
+	//Metodos( el boton de volver generado por IA)
 	
+	//IA
+	private void volverAPantallaPrincipal() {
+		// Si la simulación está en marcha, la paro antes de salir
+		if (hiloConsumo != null) {
+			hiloConsumo.interrupt();
+		}
+		this.dispose();
+		// La principal sigue abierta: solo la pongo delante
+		if (ventanaAnterior != null) {
+			ventanaAnterior.toFront();
+		}
+	}
+	
+	//FIN IA
+	
+	private static String textoEstado(int stock, int stockmin) {
+		if (stock == 0) return "Agotado";
+		if (stock <= stockmin) return "Bajo";
+		return "OK";
+	}
+	
+	//Generado con IA
+	private static void pintarBarra(Graphics g, int x, int y, int ancho, int alto,
+            int stock, int stockmin) {
+// Fondo de la barra
+g.setColor(BARRA_FONDO);
+g.fillRect(x, y, ancho, alto);
+
+if (stock == 0) {
+// Agotado: solo una marca roja al principio, como en la segunda imagen
+g.setColor(ROJO);
+g.fillRect(x, y, 3, alto);
+return;
+}
+
+int maximo = Math.max(stockmin * 2, 1);
+double proporcion = Math.min(1.0, stock / (double) maximo);
+int relleno = Math.max(3, (int) Math.round(ancho * proporcion));
+
+g.setColor(stock <= stockmin ? AMBAR : VERDE);
+g.fillRect(x, y, relleno, alto);
+}
+	
+	
+//FIN DE GENERADO CON IA
+	
+	private static class BarraStockRenderer extends JComponent implements TableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+		private int stock;
+		private int stockmin;
+		private Color fondo;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
+			stock = (int) table.getValueAt(row, 4);
+			stockmin = (int) table.getValueAt(row, 5);
+			fondo = isSelected ? table.getSelectionBackground() : Color.WHITE; // fondo de la celda
+			// Al pasar el ratón se ve el número exacto
+			setToolTipText(stock + " unidades (mínimo " + stockmin + ")");
+			return this;
+		}
+		
+		//IA esta parte de pintar
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			g.setColor(fondo);
+			g.fillRect(0, 0, getWidth(), getHeight());
+			int alto = 8;
+			pintarBarra(g, 8, (getHeight() - alto) / 2, getWidth() - 24, alto, stock, stockmin);
+		}
+	}
+	
+
+		private static class EstadoRenderer extends JComponent implements TableCellRenderer {
+
+			private static final long serialVersionUID = 1L;
+			private String texto;
+			private Color fondo;
+			private Color fondoEtiqueta;
+			private Color colorTexto;
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value,
+					boolean isSelected, boolean hasFocus, int row, int column) {
+				int stock = (int) table.getValueAt(row, 4);
+				int stockmin = (int) table.getValueAt(row, 5);
+				texto = textoEstado(stock, stockmin);
+				fondo = isSelected ? table.getSelectionBackground() : Color.WHITE; // fondo de la celda
+				fondoEtiqueta = colorFondoEstado(texto);
+				colorTexto = colorTextoEstado(texto);
+				setFont(table.getFont().deriveFont(Font.BOLD, 12f));
+				return this;
+			}
+			
+			//PAINT IA
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2 = (Graphics2D) g;
+				g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+						RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+				g2.setColor(fondo);
+				g2.fillRect(0, 0, getWidth(), getHeight());
+
+				// Etiqueta rectangular (esquinas cuadradas)
+				int anchoEtiqueta = 76;
+				int altoEtiqueta = 22;
+				int x = 8;
+				int y = (getHeight() - altoEtiqueta) / 2;
+				g2.setColor(fondoEtiqueta);
+				g2.fillRect(x, y, anchoEtiqueta, altoEtiqueta);
+
+				// Texto centrado dentro de la etiqueta
+				g2.setFont(getFont());
+				FontMetrics fm = g2.getFontMetrics();
+				int tx = x + (anchoEtiqueta - fm.stringWidth(texto)) / 2;
+				int ty = y + (altoEtiqueta - fm.getHeight()) / 2 + fm.getAscent();
+				g2.setColor(colorTexto);
+				g2.drawString(texto, tx, ty);
+			}
+		}
+		private static Color colorFondoEstado(String estado) {
+			switch (estado) {
+				case "Agotado": return AGOTADO_FONDO;
+				case "Bajo":    return BAJO_FONDO;
+				default:        return OK_FONDO;
+			}
+		}
+		
+		private static Color colorTextoEstado(String estado) {
+			switch (estado) {
+				case "Agotado": return AGOTADO_TEXTO;
+				case "Bajo":    return BAJO_TEXTO;
+				default:        return OK_TEXTO;
+			}
+		}
+		
+		private void mostrarInfoProducto(int fila) {
+
+			JPanel contenido = crearPanelInfoProducto(fila);
+		
+
+			JOptionPane.showOptionDialog(
+					this,
+					contenido,
+					"Información del producto",
+					JOptionPane.DEFAULT_OPTION,
+					JOptionPane.PLAIN_MESSAGE,  
+					null,
+					new Object[] { "Cerrar" },  
+					"Cerrar");
+		}
+		
+		private JPanel crearPanelInfoProducto(int fila) {
+
+			int id = (int) tablaProductos.getValueAt(fila, 0);
+			String nombre = (String) tablaProductos.getValueAt(fila, 1);
+			String categoria = (String) tablaProductos.getValueAt(fila, 2);
+			double precio = (double) tablaProductos.getValueAt(fila, 3);
+			int stock = (int) tablaProductos.getValueAt(fila, 4);
+			int stockmin = (int) tablaProductos.getValueAt(fila, 5);
+			String estado = textoEstado(stock, stockmin);
+
+			Color gris = new Color(120, 120, 135);
+
+			JPanel contenido = new JPanel(new BorderLayout(24, 0));
+			contenido.setBorder(BorderFactory.createEmptyBorder(10, 6, 10, 6));
+
+			JLabel foto = new JLabel("foto del producto", JLabel.CENTER);
+			foto.setPreferredSize(new Dimension(180, 210));
+			foto.setOpaque(true);
+			foto.setBackground(new Color(232, 228, 250));
+			foto.setForeground(new Color(110, 85, 190));
+			foto.setBorder(BorderFactory.createDashedBorder( new Color(165, 145, 225), 1, 4, 3, false));
+			
+			String archivoFoto = null;
+			switch (id) {
+				case 1:  archivoFoto = "cocacola.png"; break;
+				case 2:  archivoFoto = "cocazero.png"; break;
+				case 3:  archivoFoto = "fanta.jpeg"; break;
+				case 4:  archivoFoto = "fantal.jpeg"; break;
+				case 5:  archivoFoto = "sprite.jpg"; break;
+				case 6:  archivoFoto = "redbull.png"; break;
+				case 7:  archivoFoto = "monster.jpg"; break;
+				case 8:  archivoFoto = "redbull.jpeg"; break;   
+				case 9:  archivoFoto = "heineken.png"; break;
+				case 10: archivoFoto = "estrella.png"; break;
+				case 11: archivoFoto = "mahou.png"; break;
+				case 12: archivoFoto = "cervezasin.png"; break;
+				case 13: archivoFoto = "vodka.png"; break;
+				case 14: archivoFoto = "ron.png"; break;
+				case 15: archivoFoto = "whisky.png"; break;
+				case 16: archivoFoto = "ginebra.png"; break;
+				case 17: archivoFoto = "tekila.jpg"; break;
+				case 18: archivoFoto = "jager.jpg"; break;
+				case 19: archivoFoto = "agua.jpeg"; break;
+				case 20: archivoFoto = "zumo.png"; break;      
+				case 21: archivoFoto = "tonica.png"; break;
+				case 22: archivoFoto = "hielo.jpg"; break;
+			}
+
+			// Pongo la foto en lugar del texto "foto del producto"
+			ImageIcon icono = new ImageIcon("Resources/Images/" + archivoFoto);
+	
+			Image escalada = icono.getImage().getScaledInstance(180, 210, Image.SCALE_SMOOTH);
+			foto.setIcon(new ImageIcon(escalada));
+			foto.setText("");
+			
+
+			JPanel panelFoto = new JPanel(new BorderLayout());
+			panelFoto.add(foto, BorderLayout.NORTH);
+			contenido.add(panelFoto, BorderLayout.WEST);
+
+			
+			JPanel datos = new JPanel();
+			datos.setLayout(new BoxLayout(datos, BoxLayout.Y_AXIS));
+
+			JLabel lblNombre = new JLabel(nombre);
+			lblNombre.setFont(lblNombre.getFont().deriveFont(Font.BOLD, 24));
+
+			JLabel lblCategoria = new JLabel(categoria + " · ID " + id);
+			lblCategoria.setFont(lblCategoria.getFont().deriveFont(Font.PLAIN, 14));
+			lblCategoria.setForeground(gris);
+
+			JLabel lblPrecio = new JLabel(String.format("%.2f €", precio));
+			lblPrecio.setFont(lblPrecio.getFont().deriveFont(Font.BOLD, 15));
+
+			JLabel lblStock = new JLabel(stock + " unidades (mínimo " + stockmin + ")");
+			lblStock.setFont(lblStock.getFont().deriveFont(Font.PLAIN, 15));
+			
+			// Barra de stock 
+			JComponent barra = new JComponent() {
+				private static final long serialVersionUID = 1L;
+				@Override
+				protected void paintComponent(Graphics g) {
+					pintarBarra(g, 0, 0, getWidth(), getHeight(), stock, stockmin);
+				}
+			};
+			barra.setPreferredSize(new Dimension(320, 8));
+			barra.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
+
+			// Etiqueta de estado 
+			JLabel lblEstado = new JLabel(estado.equals("OK") ? "Stock correcto"
+					: estado.equals("Bajo") ? "Stock bajo" : "Agotado");
+			lblEstado.setOpaque(true);
+			lblEstado.setBackground(colorFondoEstado(estado));
+			lblEstado.setForeground(colorTextoEstado(estado));
+			lblEstado.setFont(lblEstado.getFont().deriveFont(Font.BOLD, 13));
+			lblEstado.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
+			
+			JLabel lblTituloPrecio = new JLabel("PRECIO");
+			lblTituloPrecio.setFont(lblTituloPrecio.getFont().deriveFont(Font.PLAIN, 12));
+			
+			lblTituloPrecio.setForeground(gris);
+
+			JLabel lblTituloStock = new JLabel("STOCK");
+			
+			lblTituloStock.setFont(lblTituloStock.getFont().deriveFont(Font.PLAIN, 12));
+			
+			lblTituloStock.setForeground(gris);
+
+			JLabel lblTituloEstado = new JLabel("ESTADO");
+			
+			lblTituloEstado.setFont(lblTituloEstado.getFont().deriveFont(Font.PLAIN, 12));
+			lblTituloEstado.setForeground(gris);
+			
+			lblNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblCategoria.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblTituloPrecio.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblPrecio.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblTituloStock.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblStock.setAlignmentX(Component.LEFT_ALIGNMENT);
+			barra.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblTituloEstado.setAlignmentX(Component.LEFT_ALIGNMENT);
+			lblEstado.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+			datos.add(lblNombre);
+			datos.add(lblCategoria);
+			datos.add(Box.createVerticalStrut(14));
+			datos.add(lblTituloPrecio);
+			datos.add(lblPrecio);
+			datos.add(Box.createVerticalStrut(12));
+			datos.add(lblTituloStock);
+			datos.add(lblStock);
+			datos.add(Box.createVerticalStrut(6));
+			datos.add(barra);
+			datos.add(Box.createVerticalStrut(12));
+			datos.add(lblTituloEstado);
+			datos.add(Box.createVerticalStrut(4));
+			datos.add(lblEstado);
+
+			contenido.add(datos, BorderLayout.CENTER);
+			return contenido;
+		}
 
 	//CREO EL THREAD PARA DIMULAR EL CONSUMO DE PRODUCTOS
 	private class HiloConsumo extends Thread {
