@@ -6,11 +6,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -65,13 +67,21 @@ public class Jframereservados extends JFrame {
 		
 		// camarero
 
-		camarero = new JLabel("Camarero", JLabel.CENTER);
+		camarero = new JLabel("", JLabel.CENTER);
 		camarero.setFont(new Font("Arial", Font.BOLD, 12));
+		camarero.setBounds(265, 10, 70, 90);
+		ImageIcon iconoOriginal = new ImageIcon("./resources/images/joritzcamarero.jpeg");
+		Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(70, 90, Image.SCALE_SMOOTH);
+		camarero.setIcon(new ImageIcon(imagenEscalada));
+
 		camarero.setOpaque(true);
-		camarero.setBackground(Color.ORANGE);
 		camarero.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-		camarero.setBounds(265, 10, 80, 30);
 		camarero.setVisible(false); //
+		panelpista.add(camarero);
+		
+
+
+		camarero.setVisible(false);
 		panelpista.add(camarero);
 		
 		JButton btnVolver = new JButton("Volver");
@@ -529,6 +539,4 @@ public class Jframereservados extends JFrame {
 }
 }
 
-//IDEAS DE MEJORA DE CÓDIGO A FUTURO
 
-//ESTARIA BIEN INTENTAR FUSIONAR MEDIANTE UNA BD Y UN HILO EL TEMA DE LOS PEDIDOS DE LOS RESERVADOS Y EL INVENTARIO
