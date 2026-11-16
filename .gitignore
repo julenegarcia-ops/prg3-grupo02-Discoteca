@@ -1,24 +1,13 @@
-# Compilados de la app de asistencia
-herramientas/asistencia/out/
-
-# Java / IDEs
-*.class
-bin/
-target/
-.idea/
-*.iml
-.vscode/
-.settings/
-.classpath
-.project
-
-# Copias de seguridad locales de la app de asistencia
-IngasPutoAmo/
-.IngasPutoAmo/
-
 # Código compilado
 *.class
-/bin/
+bin/
+build/
+out/
+target/
+
+# Logs y errores de la JVM
+*.log
+hs_err_pid*
 
 # Eclipse
 .metadata/
@@ -36,7 +25,14 @@ IngasPutoAmo/
 # Ficheros de SQLite
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
 
-# Ficheros del sistema operativo
+# Ficheros del sistema operativo y temporales
 .DS_Store
 Thumbs.db
+desktop.ini
+*.bak
+*~
