@@ -73,6 +73,11 @@ public class Jframereservados extends JFrame {
 		camarero.setBounds(265, 10, 80, 30);
 		camarero.setVisible(false); //
 		panelpista.add(camarero);
+		
+		JButton btnVolver = new JButton("Volver");
+		btnVolver.setBounds(10, 10, 90, 30);
+		btnVolver.addActionListener(e -> dispose());
+		panelpista.add(btnVolver);
 
 		add(panelpista, BorderLayout.CENTER);
 
