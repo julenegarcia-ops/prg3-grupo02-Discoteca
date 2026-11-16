@@ -55,12 +55,14 @@ public class JFrameEntradas extends JFrame {
 		JButton btnAforo = new JButton("Ver aforo");
 		JButton btnAbrirWeb = new JButton("Abrir web");
 		JButton btnCerrarWeb = new JButton("Cerrar web");
+		JButton btnVolver = new JButton("Volver");
 		lblWeb = new JLabel("Web: cerrada");
 		panelBotones.add(btnVender);
 		panelBotones.add(btnDevolver);
 		panelBotones.add(btnAforo);
 		panelBotones.add(btnAbrirWeb);
 		panelBotones.add(btnCerrarWeb);
+		panelBotones.add(btnVolver);
 		panelBotones.add(lblWeb);
 		panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
 
@@ -79,6 +81,7 @@ public class JFrameEntradas extends JFrame {
 
 		btnAbrirWeb.addActionListener(e -> abrirWeb());
 		btnCerrarWeb.addActionListener(e -> cerrarWeb());
+		btnVolver.addActionListener(e -> dispose());
 
 		// si cierran la ventana con la web abierta, paro los hilos
 		addWindowListener(new WindowAdapter() {
