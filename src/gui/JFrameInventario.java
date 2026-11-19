@@ -30,6 +30,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -58,6 +59,10 @@ public class JFrameInventario extends JFrame{
 	// Botones para controlar la simulación del Thread que simula el consumo de productos durante los eventos
 	private JButton btnIniciar;
 	private JButton btnParar;
+	
+	//Boton para realizar el pedido manualmente y el historial de en cada venta que producto se ha restado del inventario
+	private JButton btnPedido;
+	private JButton btnHistorial;
 
 	// Thread que simulará el consumo de los productos
 	private HiloConsumo hiloConsumo;
@@ -244,6 +249,8 @@ public class JFrameInventario extends JFrame{
 
 		// Inicialmente estará desactivado
 		this.btnActualizarStock.setEnabled(false);
+		btnActualizarStock.setBackground(Color.WHITE);
+		btnActualizarStock.setForeground(Color.BLACK);
 		
 
 		// Evento al seleccionar una fila de la tabla
@@ -371,8 +378,13 @@ public class JFrameInventario extends JFrame{
 		//CREO LOS BOTONES Y SUS LISTENERS para el Thread de simulación de consumo
 
 		// Botón para iniciar la simulación
+		
+		//Color rojo para el boton de parar y verde para el de la simulacion
+		
 		btnIniciar = new JButton("Iniciar simulación");
 		btnIniciar.setEnabled(true);
+		btnIniciar.setBackground(new Color(4, 120, 87));
+		btnIniciar.setForeground(Color.WHITE);
 
 		btnIniciar.addActionListener(e -> {
 
@@ -388,6 +400,8 @@ public class JFrameInventario extends JFrame{
 		// Botón para detener la simulación
 		btnParar = new JButton("Detener simulación");
 		btnParar.setEnabled(false);
+		btnParar.setBackground(Color.red.darker());
+		btnParar.setForeground(Color.WHITE);
 
 		btnParar.addActionListener(e -> {
 
@@ -398,7 +412,21 @@ public class JFrameInventario extends JFrame{
 		    btnParar.setEnabled(false);
 		});
 
+		//Creo los botones del historial y del pedido y sus listeners  TODAVIA FALTA DE HACER LOS LISTENERS
 		
+		btnHistorial = new JButton("Historial");
+		btnHistorial.setBackground(Color.WHITE);
+		btnHistorial.setForeground(Color.BLACK);
+		
+		btnPedido = new JButton("Hacer pedido");
+		
+		btnHistorial.addActionListener(e -> {
+			JOptionPane.showMessageDialog(this, "Falta de hacer");
+		});
+		
+		btnPedido.addActionListener(e -> {
+			JOptionPane.showMessageDialog(this, "Falta de hacer");
+		});
 		
 		// PONEMOS LOS COMPONENTES DE LA VENTANA 
 		// Creo el panel principal 
@@ -435,9 +463,11 @@ public class JFrameInventario extends JFrame{
 		JPanel panelInferior = new JPanel(new BorderLayout(10, 10));
 
 		// Panel para los botones
-		JPanel panelBotones = new JPanel(new GridLayout(1, 3, 10, 10));
+		JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
 		panelBotones.add(btnActualizarStock);
+		panelBotones.add(btnHistorial);
+		panelBotones.add(btnPedido);
 		panelBotones.add(btnIniciar);
 		panelBotones.add(btnParar);
 
@@ -459,7 +489,7 @@ public class JFrameInventario extends JFrame{
 		// Configuración de la ventana
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setTitle("INVENTARIO");
-		this.setSize(800, 600);
+		this.setSize(1000, 650);
 		this.setLocationRelativeTo(null);
 		
 		//Generado por IA
