@@ -63,6 +63,8 @@ public class JFrameInventario extends JFrame{
 	//Boton para realizar el pedido manualmente y el historial de en cada venta que producto se ha restado del inventario
 	private JButton btnPedido;
 	private JButton btnHistorial;
+	
+	private JButton btnProducto; //para añadir un nuevo producto q no existe
 
 	// Thread que simulará el consumo de los productos
 	private HiloConsumo hiloConsumo;
@@ -419,6 +421,8 @@ public class JFrameInventario extends JFrame{
 		btnHistorial.setForeground(Color.BLACK);
 		
 		btnPedido = new JButton("Hacer pedido");
+		btnPedido.setBackground(MORADO);
+		btnPedido.setForeground(Color.WHITE);
 		
 		btnHistorial.addActionListener(e -> {
 			JOptionPane.showMessageDialog(this, "Falta de hacer");
@@ -442,11 +446,45 @@ public class JFrameInventario extends JFrame{
 		this.tablaProductos.setFillsViewportHeight(true);
 		
 		btnVolver = new JButton("Volver"); 
+		btnVolver.setBackground(Color.WHITE);
+		btnVolver.setForeground(Color.BLACK);
 		
 		btnVolver.addActionListener(e -> volverAPantallaPrincipal());
+		//titulo y subtitulo para que indique que si clicas dos veces veras la informacion del producto
 
 		JPanel panelSuperior = new JPanel(new BorderLayout());
-		panelSuperior.add(btnVolver, BorderLayout.WEST);
+		panelSuperior.setOpaque(false);
+		
+		JPanel tituloysub = new JPanel();
+		//para que aparezca el titulo arriba y subtitulo abajo
+		tituloysub.setLayout(new BoxLayout(tituloysub, BoxLayout.Y_AXIS));
+		JLabel lbltitulo = new JLabel("Inventario");
+		tituloysub.add(lbltitulo);
+		lbltitulo.setFont(new Font("Arial",Font.BOLD, 18));
+		JLabel lblsubtitulo = new JLabel("Doble click para ver la información del producto");
+		lblsubtitulo.setFont(lblsubtitulo.getFont().deriveFont(Font.ITALIC, 10));
+		lblsubtitulo.setForeground(Color.GRAY);
+		tituloysub.add(lblsubtitulo);
+		
+		btnProducto = new JButton("Nuevo producto");
+		btnProducto.setBackground(MORADO);
+		btnProducto.setForeground(Color.WHITE);
+		
+		btnProducto.addActionListener(e -> {
+			JOptionPane.showMessageDialog(this, "falta");
+		});
+		
+		JPanel panelIzquierda = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		panelIzquierda.add(btnVolver);
+		panelIzquierda.add(tituloysub);
+		
+		//para añadir el boton en la otra esquina
+		JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		panelDerecha.add(btnProducto);
+		
+		panelSuperior.add(panelIzquierda, BorderLayout.CENTER);
+		panelSuperior.add(panelDerecha, BorderLayout.EAST);
+		
 		// Línea morada debajo de la cabecera
 		panelSuperior.setBorder(BorderFactory.createCompoundBorder(
 		        BorderFactory.createMatteBorder(0, 0, 3, 0, MORADO),
