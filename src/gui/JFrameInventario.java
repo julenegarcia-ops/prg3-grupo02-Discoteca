@@ -56,6 +56,12 @@ public class JFrameInventario extends JFrame{
 	
 	private JButton btnActualizarStock;
 	
+	//los valores que van dentro de las tarjetas de informacion
+	private JLabel lblnumproductos;
+	private JLabel lblstockbajo;
+	private JLabel lblstockagotado;
+	private JLabel lblprecio;
+	
 	// Botones para controlar la simulación del Thread que simula el consumo de productos durante los eventos
 	private JButton btnIniciar;
 	private JButton btnParar;
@@ -73,7 +79,7 @@ public class JFrameInventario extends JFrame{
 	private JButton btnVolver;
 	private JFramePrincipal ventanaAnterior;
 	
-	// Colores tanto para decorar como para el stock.
+	// Colores tanto para decorar como para el stock. //IA
 	private static final Color MORADO = new Color(124, 58, 237);
 	private static final Color BARRA_FONDO = new Color(232, 230, 240);
 	private static final Color VERDE = new Color(34, 160, 80);
@@ -85,6 +91,7 @@ public class JFrameInventario extends JFrame{
 	private static final Color BAJO_TEXTO = new Color(150, 100, 10);
 	private static final Color AGOTADO_FONDO = new Color(250, 215, 215);
 	private static final Color AGOTADO_TEXTO = new Color(180, 40, 40);
+	//FIN IA
 
 	public JFrameInventario(JFramePrincipal ventanaAnterior) {
 		this.ventanaAnterior = ventanaAnterior;
@@ -336,6 +343,7 @@ public class JFrameInventario extends JFrame{
 		            // Actualizo el modelo de la JTable
 		            tablaProductos.setValueAt(nuevoStock, fila, 4);
 		            tablaProductos.repaint();
+		            actualizarResumen();
 
 		            // Actualizo la etiqueta inferior
 		            lblSeleccion.setText(
@@ -485,13 +493,36 @@ public class JFrameInventario extends JFrame{
 		panelSuperior.add(panelIzquierda, BorderLayout.CENTER);
 		panelSuperior.add(panelDerecha, BorderLayout.EAST);
 		
-		// Línea morada debajo de la cabecera
+		// IA
 		panelSuperior.setBorder(BorderFactory.createCompoundBorder(
 		        BorderFactory.createMatteBorder(0, 0, 3, 0, MORADO),
 		        BorderFactory.createEmptyBorder(0, 0, 10, 0)));
-		principal.add(panelSuperior, BorderLayout.NORTH);
+		
+		//Fin IA
+		
+		//creo los labels para las terjetas
+		lblnumproductos = new JLabel();
+		lblstockbajo = new JLabel();
+		lblstockagotado = new JLabel();
+		lblprecio = new JLabel();
+		
+		//creo un panel para poner una detras de otra y con separacion y luego eso ponerlo en la principal
+		JPanel panelTarjetas = new JPanel(new GridLayout(1,4,12,0));
+		panelTarjetas.add(crearTarjetas("Productos", lblnumproductos,Color.BLACK, "en total"));
+		panelTarjetas.add(crearTarjetas("Stock bajo", lblstockbajo,AMBAR, "por debajo del stock minimo"));
+		panelTarjetas.add(crearTarjetas("Agotados", lblstockagotado,Color.RED.darker(), "estan agotados, reponer!"));
+		panelTarjetas.add(crearTarjetas("Valor total", lblprecio,MORADO, "precio x total"));
+		
+		//para que se le añadan los datos a las tarjetas
+		actualizarResumen();
+		
+		//creo u  panel para poner el pnel superior con el de la tarjetas y luego añadirlo al principal
+		JPanel panelarriba = new JPanel(new BorderLayout(0,12));
+		panelarriba.add(panelSuperior, BorderLayout.NORTH);
+		panelarriba.add(panelTarjetas, BorderLayout.CENTER);
+		
+		principal.add(panelarriba, BorderLayout.NORTH);
 
-		// Añado los  componentes
 
 		// Tabla en el centro
 		principal.add(scrollinventario, BorderLayout.CENTER);
@@ -560,6 +591,60 @@ public class JFrameInventario extends JFrame{
 	}
 	
 	//FIN IA
+	
+	//una funcion para que cree el panel de las tarjetas de informacion ya que sino tendria que repetir
+	//codigo muchas veces.
+	
+	private JPanel crearTarjetas(String titulo, JLabel lblnumero, Color colorNumero, String pie) {
+		JPanel tarjeta = new JPanel();
+		tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
+		tarjeta.setBackground(Color.WHITE);
+		tarjeta.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.BLACK), BorderFactory.createEmptyBorder(10,14,10,14)));
+		
+		//el titulo de si son todos los productos, o agotados...
+		JLabel lbltitutlo = new JLabel(titulo);
+		lbltitutlo.setForeground(Color.GRAY);
+		
+		//el numero que va en grande y el color varia de si hablamos de los agotados, o los productos totales...
+		lblnumero.setForeground(colorNumero);
+		lblnumero.setFont(lblnumero.getFont().deriveFont(Font.BOLD,22));
+		
+		// de que es la informacion 
+		JLabel lblpie = new JLabel(pie);
+		lblpie.setForeground(Color.GRAY);
+		lblpie.setFont(lblpie.getFont().deriveFont(Font.ITALIC,10));
+		
+		tarjeta.add(lbltitutlo);
+		tarjeta.add(lblnumero);
+		tarjeta.add(lblpie);
+		
+		return tarjeta;
+		
+	}
+	//esta funcion sirve para ir calculando y con lo que calcule actualizar el contenido de las tarjetas
+	private void actualizarResumen() {
+		//definimos estos tres para ir sumando 
+		int bajos = 0;
+		int agotados = 0;
+		double valor = 0;
+		
+		//si es cero se le suma 1 a agotados, si el stockes menor o igual al minimo se le suma uno al bajo
+		//y para calcular el precio de td el stock vamos multiplicando el preico con el stock
+		for (Producto producto : productos) {
+			if(producto.getStock() == 0) {
+				agotados ++;
+			} else if(producto.getStock() <= producto.getStockmin()) {
+				bajos ++;
+			}
+			valor += producto.getPrecio()*producto.getStock();
+		}
+		
+		//y esto es para que lo calculado anteriormente aparezca en las tarjetas
+		lblnumproductos.setText(String.valueOf(productos.size()));
+		lblstockbajo.setText(String.valueOf(bajos));
+		lblstockagotado.setText(String.valueOf(agotados));
+		lblprecio.setText(String.format("%.2f €", valor));
+	}
 	
 	private static String textoEstado(int stock, int stockmin) {
 		if (stock == 0) return "Agotado";
@@ -878,6 +963,7 @@ g.fillRect(x, y, relleno, alto);
 						
 						// Actualizo el renderizado de toda la fila, para que cambie el color de toda la fila del producto si es necesario 
 						modeloDatosProductos.fireTableRowsUpdated(posicion, posicion);
+						actualizarResumen();
 
 						// Actualizo la informacion el el label de información de la ventana JFrameInventario
 						lblSeleccion.setText(
