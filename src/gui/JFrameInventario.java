@@ -16,11 +16,13 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
@@ -180,6 +182,10 @@ public class JFrameInventario extends JFrame{
 		            result.setText(value.toString());
 		        } else {
 		            result.setText("");
+		        }
+		        
+		        if (column == 3 && value != null) {
+		            result.setText(String.format("%.2f €", (double) value));
 		        }
 		        
 		        result.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
@@ -478,9 +484,7 @@ public class JFrameInventario extends JFrame{
 		btnProducto.setBackground(MORADO);
 		btnProducto.setForeground(Color.WHITE);
 		
-		btnProducto.addActionListener(e -> {
-			JOptionPane.showMessageDialog(this, "falta");
-		});
+		btnProducto.addActionListener(e -> crearNuevoProducto());
 		
 		JPanel panelIzquierda = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		panelIzquierda.add(btnVolver);
@@ -646,6 +650,95 @@ public class JFrameInventario extends JFrame{
 		lblprecio.setText(String.format("%.2f €", valor));
 	}
 	
+	// esta funcion es para crear el formulario con los requisitos para añadir un nuveo producto
+	private void crearNuevoProducto() {
+		
+		//crear los campos y añadirlo al panel para que aparezca en el joptionppane
+		JTextField txtnombre = new JTextField(15);
+		JComboBox<String> comboCategoria = new JComboBox<>(new String[] {"Refrescos", "Energéticas", "Cervezas","Licores","Otros"});
+		JTextField txtprecio = new JTextField();
+		JTextField txtstock = new JTextField();
+		JTextField txtstockmin = new JTextField();
+		
+		JPanel formulario = new JPanel(new GridLayout(5,2,8,8));
+		formulario.add(new JLabel("Nombre: "));
+		formulario.add(txtnombre);
+		formulario.add(new JLabel("Categoria: "));
+		formulario.add(comboCategoria);
+		formulario.add(new JLabel("Precio: "));
+		formulario.add(txtprecio);
+		formulario.add(new JLabel("Stock: "));
+		formulario.add(txtstock);
+		formulario.add(new JLabel("Stock minimo: "));
+		formulario.add(txtstockmin);
+		
+		int result = JOptionPane.showConfirmDialog(this, formulario, "Nuevo producto",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		
+		if(result != JOptionPane.OK_OPTION) {
+			return;
+		}
+		
+		String nombre = txtnombre.getText();
+		String categoria = (String) comboCategoria.getSelectedItem();
+		
+		if(nombre.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "El nombre no puede estar vacio", "ERROR", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// para pasar lo que escriban a lo que tienen que ser.
+		// por ejemplo, si es un precio hay que pasarlo a double
+		double precio;
+		int stock;
+		int stockmin;
+		
+		try {
+			precio = Double.parseDouble(txtprecio.getText());
+			stock = Integer.parseInt(txtstock.getText());
+			stockmin = Integer.parseInt(txtstockmin.getText());
+			
+		}catch(NumberFormatException ex) {
+			JOptionPane.showMessageDialog(this,"El precio debe ser un número y los stocks números enteros","Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		// que aparezca un error en caso de que el precio sea negativo y los dos stocks tambien
+		if(precio <= 0 || stock < 0 || stockmin < 0) {
+			JOptionPane.showMessageDialog(this, "el precio debe ser mayor que 0 y los stocks no pueden ser negativos", "ERROR", JOptionPane.ERROR_MESSAGE);
+			return;
+
+		}
+		
+		// le añade un id apartir de todos los productos que ya tienen sus ids
+		int nuevoId = 0;
+		for (Producto p : productos) {
+			if (p.getId() > nuevoId) {
+				nuevoId = p.getId();
+			}
+		}
+		nuevoId++;
+		
+		Producto nuevo = new Producto(nuevoId, nombre, categoria, precio, stock, stockmin);
+		productos.add(nuevo);
+		
+		Vector<Object> fila = new Vector<Object>();
+		fila.add(nuevo.getId());
+		fila.add(nuevo.getNombre());
+		fila.add(nuevo.getCategoria());
+		fila.add(nuevo.getPrecio());
+		fila.add(nuevo.getStock());
+		fila.add(nuevo.getStockmin());
+		//null porq la septima columna es el estado y eso se calcula
+		fila.add(null);
+		modeloDatosProductos.addRow(fila);
+		
+		actualizarResumen();
+		JOptionPane.showMessageDialog(this, "Producto añadido correctamente.");
+		
+		
+	}
+	
 	private static String textoEstado(int stock, int stockmin) {
 		if (stock == 0) return "Agotado";
 		if (stock <= stockmin) return "Bajo";
@@ -692,6 +785,7 @@ g.fillRect(x, y, relleno, alto);
 			fondo = isSelected ? table.getSelectionBackground() : Color.WHITE; // fondo de la celda
 			// Al pasar el ratón se ve el número exacto
 			setToolTipText(stock + " unidades (mínimo " + stockmin + ")");
+			setFont(table.getFont().deriveFont(Font.BOLD));
 			return this;
 		}
 		
@@ -701,8 +795,20 @@ g.fillRect(x, y, relleno, alto);
 		protected void paintComponent(Graphics g) {
 			g.setColor(fondo);
 			g.fillRect(0, 0, getWidth(), getHeight());
+
+			// Dejo hueco a la derecha para el número
 			int alto = 8;
-			pintarBarra(g, 8, (getHeight() - alto) / 2, getWidth() - 24, alto, stock, stockmin);
+			int anchoNumero = 36;
+			pintarBarra(g, 8, (getHeight() - alto) / 2, getWidth() - 16 - anchoNumero, alto, stock, stockmin);
+
+			// Pinto el número de stock a la derecha de la barra
+			g.setFont(getFont());
+			g.setColor(Color.BLACK);
+			FontMetrics fm = g.getFontMetrics();
+			String texto = String.valueOf(stock);
+			int x = getWidth() - 8 - fm.stringWidth(texto);                // pegado a la derecha
+			int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();   // centrado en vertical
+			g.drawString(texto, x, y);
 		}
 	}
 	
