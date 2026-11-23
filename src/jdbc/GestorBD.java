@@ -2,6 +2,11 @@ package jdbc;
 //ESTE GESTOR SE ENCARGA DE CONECTAR INVENTARIO Y RESERVADOS
 
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import domain.Producto;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -84,5 +89,54 @@ public class GestorBD {
 				pst.executeUpdate();
 			}
 		}
+		
+		
+	}
+	
+	public List<Producto> cargarproductos() {
+		List<Producto> productos = new ArrayList<>();
+		String sql = "SELECT * FROM PRODUCTO";
+
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+			 PreparedStatement pst = con.prepareStatement(sql);
+			 ResultSet rs = pst.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("ID");
+				String nombre = rs.getString("NOMBRE");
+				String categoria = rs.getString("CATEGORIA");
+				double precio = rs.getDouble("PRECIO");
+				int stock = rs.getInt("STOCK");
+				int stockmin = rs.getInt("STOCK_MIN");
+
+				productos.add(new Producto(id, nombre, categoria, precio, stock, stockmin));
+			}
+		} catch (SQLException e) {
+			System.err.format("* Error recuperando productos: %s.\n", e.getMessage());
+		}
+
+		return productos;
+	}
+
+	public boolean actualizarstock(int idprod, int nuevoStock) {
+		String sqlUpdate = "UPDATE PRODUCTO SET STOCK = ? WHERE ID = ?";
+		boolean actualizado = false;
+
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+			 PreparedStatement pst = con.prepareStatement(sqlUpdate)) {
+
+			pst.setInt(1, nuevoStock);
+			pst.setInt(2, idprod);
+
+			int filas = pst.executeUpdate();
+			if (filas == 1) {
+				System.out.printf("[DB] Stock actualizado para ID %d.%n", idprod);
+				actualizado = true;
+			}
+		} catch (SQLException e) {
+			System.err.format("* Error actualizando stock: %s.\n", e.getMessage());
+		}
+
+		return actualizado;
 	}
 }
