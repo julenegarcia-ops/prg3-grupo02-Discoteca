@@ -45,6 +45,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.TableCellRenderer;
 
 import domain.Producto;
+import jdbc.GestorBD;
 
 public class JFrameInventario extends JFrame{
 
@@ -59,6 +60,8 @@ public class JFrameInventario extends JFrame{
 	private JLabel lblSeleccion;
 	
 	private JButton btnActualizarStock;
+	
+	private GestorBD gestorBD;
 	
 	//los valores que van dentro de las tarjetas de informacion
 	private JLabel lblnumproductos;
@@ -100,50 +103,10 @@ public class JFrameInventario extends JFrame{
 	public JFrameInventario(JFramePrincipal ventanaAnterior) {
 		this.ventanaAnterior = ventanaAnterior;
 		
-		//Generado con IA
-		// Refrescos
-		Producto p1 = new Producto(1, "Coca-Cola", "Refrescos", 3.0, 80, 15);
-		Producto p2 = new Producto(2, "Coca-Cola Zero", "Refrescos", 3.0, 45, 15);
-		Producto p3 = new Producto(3, "Fanta Naranja", "Refrescos", 3.0, 12, 15);
-		Producto p4 = new Producto(4, "Fanta Limón", "Refrescos", 3.0, 30, 10);
-		Producto p5 = new Producto(5, "Sprite", "Refrescos", 3.0, 0, 10);
-
-		// Bebidas energéticas
-		Producto p6 = new Producto(6, "Red Bull", "Energéticas", 4.5, 60, 20);
-		Producto p7 = new Producto(7, "Monster", "Energéticas", 4.0, 8, 15);
-		Producto p8 = new Producto(8, "Red Bull Sugarfree", "Energéticas", 4.5, 20, 10);
-
-		// Cervezas
-		Producto p9 = new Producto(9, "Heineken", "Cervezas", 4.0, 100, 25);
-		Producto p10 = new Producto(10, "Estrella Galicia", "Cervezas", 3.5, 20, 25);
-		Producto p11 = new Producto(11, "Mahou", "Cervezas", 3.5, 55, 20);
-		Producto p12 = new Producto(12, "Cerveza sin alcohol", "Cervezas", 3.0, 0, 10);
-
-		// Licores
-		Producto p13 = new Producto(13, "Vodka Absolut", "Licores", 8.0, 15, 5);
-		Producto p14 = new Producto(14, "Ron Barceló", "Licores", 8.0, 4, 6);
-		Producto p15 = new Producto(15, "Whisky Ballantines", "Licores", 9.0, 12, 5);
-		Producto p16 = new Producto(16, "Ginebra Beefeater", "Licores", 9.0, 3, 5);
-		Producto p17 = new Producto(17, "Tequila José Cuervo", "Licores", 7.0, 10, 5);
-		Producto p18 = new Producto(18, "Jägermeister", "Licores", 6.0, 0, 5);
-
-		// Otros productos
-		Producto p19 = new Producto(19, "Agua mineral", "Otros", 2.0, 90, 20);
-		Producto p20 = new Producto(20, "Zumo de piña", "Otros", 3.0, 5, 10);
-		Producto p21 = new Producto(21, "Tónica", "Refrescos", 2.5, 25, 10);
-		Producto p22 = new Producto(22, "Hielo", "Otros", 1.0, 40, 15);
-        
-		
-		// Creo la lista de productos
-		productos = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5,
-		        p6, p7, p8, p9, p10,
-		        p11, p12, p13, p14, p15,
-		        p16, p17, p18, p19, p20,
-		        p21, p22
-		));
-		//Fin generado por IA
-
-		
+		//carga los productos desde la base de datos
+		this.gestorBD = new GestorBD();
+		this.gestorBD.inicializarBD();
+		this.productos = this.gestorBD.cargarproductos();
 		
 		// Cabecera del modelo de datos
 		Vector<String> cabeceraProductos = new Vector<String>(
@@ -347,6 +310,7 @@ public class JFrameInventario extends JFrame{
 
 		            // Actualizo el objeto Producto
 		            productoSeleccionado.setStock(nuevoStock);
+		            gestorBD.actualizarstock(productoSeleccionado.getId(), nuevoStock);
 
 		            // Actualizo el modelo de la JTable
 		            tablaProductos.setValueAt(nuevoStock, fila, 4);
@@ -503,6 +467,7 @@ public class JFrameInventario extends JFrame{
 				if (cantidad > 0) {
 					Producto p = productos.get(i);
 					p.setStock(p.getStock() + cantidad);
+					gestorBD.actualizarstock(p.getId(), p.getStock());
 					modeloDatosProductos.setValueAt(p.getStock(), i, 4); // columna STOCK
 
 					totalunidades += cantidad;
@@ -782,33 +747,38 @@ public class JFrameInventario extends JFrame{
 
 		}
 		
-		// le añade un id apartir de todos los productos que ya tienen sus ids
-		int nuevoId = 0;
-		for (Producto p : productos) {
-			if (p.getId() > nuevoId) {
-				nuevoId = p.getId();
-			}
+		Producto nuevo = new Producto(0, nombre, categoria, precio, stock, stockmin);
+
+		if (!gestorBD.insertarproducto(nuevo)) {
+			JOptionPane.showMessageDialog(this, "Ya existe un producto con ese nombre.",
+					"ERROR", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
-		nuevoId++;
-		
-		Producto nuevo = new Producto(nuevoId, nombre, categoria, precio, stock, stockmin);
-		productos.add(nuevo);
-		
-		Vector<Object> fila = new Vector<Object>();
-		fila.add(nuevo.getId());
-		fila.add(nuevo.getNombre());
-		fila.add(nuevo.getCategoria());
-		fila.add(nuevo.getPrecio());
-		fila.add(nuevo.getStock());
-		fila.add(nuevo.getStockmin());
-		//null porq la septima columna es el estado y eso se calcula
-		fila.add(null);
-		modeloDatosProductos.addRow(fila);
+
+		recargarDesdeBD();
 		
 		actualizarResumen();
 		JOptionPane.showMessageDialog(this, "Producto añadido correctamente.");
 		
 		
+	}
+	
+	public void recargarDesdeBD() {
+		this.productos = gestorBD.cargarproductos();
+		this.modeloDatosProductos.setRowCount(0);
+		
+		for (Producto p : productos) {
+			Vector<Object> fila = new Vector<>();
+			fila.add(p.getId());
+			fila.add(p.getNombre());
+			fila.add(p.getCategoria());
+			fila.add(p.getPrecio());
+			fila.add(p.getStock());
+			fila.add(p.getStockmin());
+			fila.add(null);
+			this.modeloDatosProductos.addRow(fila);
+		}
+		actualizarResumen();
 	}
 	
 	private static String textoEstado(int stock, int stockmin) {
@@ -1134,6 +1104,7 @@ g.fillRect(x, y, relleno, alto);
 
 						// Descuento una unidad
 						p.setStock(p.getStock() - 1);
+						gestorBD.actualizarstock(p.getId(), p.getStock());
 
 						// Actualizo la tabla
 						modeloDatosProductos.setValueAt(
