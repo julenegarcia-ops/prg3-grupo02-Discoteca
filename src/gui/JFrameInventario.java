@@ -21,6 +21,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
@@ -260,7 +262,7 @@ public class JFrameInventario extends JFrame{
 		this.lblSeleccion = new JLabel("Selecciona un producto de la tabla");
 
 		// Botón para actualizar el stock
-		this.btnActualizarStock = new JButton("Actualizar stock");
+		this.btnActualizarStock = new JButton("Ajustar stock");
 
 		// Inicialmente estará desactivado
 		this.btnActualizarStock.setEnabled(false);
@@ -443,7 +445,77 @@ public class JFrameInventario extends JFrame{
 		});
 		
 		btnPedido.addActionListener(e -> {
-			JOptionPane.showMessageDialog(this, "Falta de hacer");
+			
+			//crear panel para la ventana
+			JPanel panellista = new JPanel(new GridLayout(0,4,10,6));
+			panellista.add(new JLabel("Producto"));
+			panellista.add(new JLabel("Stock"));
+			panellista.add(new JLabel("Mínimo"));
+			panellista.add(new JLabel("Cantidad a pedir"));
+			
+			//guardar las posiciones para añadir despues lo que has pedido
+			
+			List<Integer>posiciones = new ArrayList<>();
+			List<JSpinner> spinners = new ArrayList<>();
+			
+			for (int i = 0; i < productos.size(); i++) {
+				Producto p = productos.get(i);
+				if(p.getStock() <= p.getStockmin()) {
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0,0,500,1));
+					
+					panellista.add(new JLabel(p.getNombre()));
+					panellista.add(new JLabel(String.valueOf(p.getStock())));
+					panellista.add(new JLabel(String.valueOf(p.getStockmin())));
+					panellista.add(spinner);
+					
+					posiciones.add(i);
+					spinners.add(spinner);
+					
+				}
+			}
+			
+			if(posiciones.isEmpty()) {
+				JOptionPane.showMessageDialog(this, "No hay nada al minimo");
+				return;
+			}
+			
+			JScrollPane scrollpedido = new JScrollPane(panellista);
+			scrollpedido.setPreferredSize(new Dimension(500,300));
+			
+			JPanel panelpedido = new JPanel(new BorderLayout(0,8));
+			panelpedido.add(new JLabel("Elige cuántas unidades pedir de cada producto:"), BorderLayout.NORTH);
+			panelpedido.add(scrollpedido, BorderLayout.CENTER);
+			
+			int result = JOptionPane.showConfirmDialog(this, panelpedido,"pedido a proveedor", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+			
+			if(result != JOptionPane.OK_OPTION) {
+				return;
+			}
+			
+			//reponer los productos
+			int totalunidades = 0;
+			int productospedidos = 0;
+			
+			for (int j = 0; j < posiciones.size(); j++) {
+				int i = posiciones.get(j);
+				int cantidad = (int) spinners.get(j).getValue();
+
+				if (cantidad > 0) {
+					Producto p = productos.get(i);
+					p.setStock(p.getStock() + cantidad);
+					modeloDatosProductos.setValueAt(p.getStock(), i, 4); // columna STOCK
+
+					totalunidades += cantidad;
+					productospedidos++;
+				}
+			}
+			if(totalunidades == 0) {
+				JOptionPane.showMessageDialog(this, "No se ha pedido nada");
+				return;
+			}
+			actualizarResumen();
+			
+			JOptionPane.showMessageDialog(this, "Pedido realizado: " + productospedidos + " productos (" + totalunidades + " unidades)");
 		});
 		
 		// PONEMOS LOS COMPONENTES DE LA VENTANA 
