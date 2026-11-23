@@ -139,4 +139,75 @@ public class GestorBD {
 
 		return actualizado;
 	}
+	
+	public boolean insertarproducto(Producto producto) {
+		String sqlinsertar = "INSERT INTO PRODUCTO (NOMBRE, CATEGORIA, PRECIO, STOCK, STOCK_MIN) VALUES (?, ?, ?, ?, ?)";
+		boolean insertado = false;
+
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+			 PreparedStatement pst = con.prepareStatement(sqlinsertar)) {
+
+			pst.setString(1, producto.getNombre());
+			pst.setString(2, producto.getCategoria());
+			pst.setDouble(3, producto.getPrecio());
+			pst.setInt(4, producto.getStock());
+			pst.setInt(5, producto.getStockmin());
+
+			if (pst.executeUpdate() == 1) {
+				System.out.printf("[DB] Producto '%s' insertado correctamente.%n", producto.getNombre());
+				insertado = true;
+			}
+		} catch (SQLException e) {
+			System.err.format("* Error insertando producto '%s': %s.\n", producto.getNombre(), e.getMessage());
+		}
+
+		return insertado;
+	}
+
+	public boolean  conectarstockynombre(String nombreproducto, int cantidad) {
+		String sqlelegido = "SELECT ID, STOCK FROM PRODUCTO WHERE NOMBRE = ?";
+		String sqlupdate = "UPDATE PRODUCTO SET STOCK = ? WHERE ID = ?";
+
+		boolean actualizado = false;
+		int idprod = -1;
+		int stock = 0;
+
+		try (Connection con = DriverManager.getConnection(CONNECTION_STRING);
+			 PreparedStatement select = con.prepareStatement(sqlelegido);
+			 PreparedStatement update = con.prepareStatement(sqlupdate)) {
+
+			select.setString(1, nombreproducto);
+			try (ResultSet rs = select.executeQuery()) {
+				if (rs.next()) {
+					idprod = rs.getInt("ID");
+					stock = rs.getInt("STOCK");
+				} else {
+					System.err.printf("[DB] No existe el producto '%s'.%n", nombreproducto);
+					return false;
+				}
+			}
+
+			if (stock < cantidad) {
+				System.err.printf("[DB] Stock insuficiente para '%s' (Actual: %d, Pedido: %d).%n",
+						nombreproducto, stock, cantidad);
+				return false;
+			}
+
+			int nuevoStock = stock - cantidad;
+			update.setInt(1, nuevoStock);
+			update.setInt(2, idprod);
+
+			int rowaf = update.executeUpdate();
+			if (rowaf == 1) {
+				System.out.printf("[DB] Se han descontado %d unidades de '%s'. Stock restante: %d.%n",
+						cantidad, nombreproducto, nuevoStock);
+				actualizado = true;
+			}
+
+		} catch (SQLException e) {
+			System.err.printf("[DB] Error al descontar stock de '%s': %s.%n", nombreproducto, e.getMessage());
+		}
+
+		return actualizado;
+	}
 }
