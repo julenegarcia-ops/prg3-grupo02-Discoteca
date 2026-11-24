@@ -15,7 +15,7 @@ import java.sql.Connection;
 
 public class GestorBD {
 
-	private static final String SQLITE_FILE = "resources/db/discoteca.db";
+	private static final String SQLITE_FILE = "./src/jdbc/discoteca.db";
 	private static final String CONNECTION_STRING = "jdbc:sqlite:" + SQLITE_FILE;
 
 	public GestorBD() {

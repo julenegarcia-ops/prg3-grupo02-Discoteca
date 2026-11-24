@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -24,12 +26,14 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+
+
 import jdbc.GestorBD;
 // Imports estimados hechos con IA.
 public class Jframereservados extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-
+	private List <Datomesa> listaMesas = new ArrayList <>();
 	private Random random = new Random();
 	private JPanel panelbarra;
 	private JLabel camarero;
@@ -40,6 +44,28 @@ public class Jframereservados extends JFrame {
 	private JFrameInventario ventanaInventario;
 
 	
+	
+	private static class Datomesa {
+	    String nombre;
+	    TipoMesa tipo;
+	    EstadoMesa estado;
+	    String cliente;
+	    JButton boton;
+
+	    Datomesa(String nombre, TipoMesa tipo, EstadoMesa estado, JButton boton) {
+	        this.nombre = nombre;
+	        this.tipo = tipo;
+	        this.estado = estado;
+	        this.cliente = "";
+	        this.boton = boton;
+	    }
+	    @Override
+	    public String toString() {
+	    	return nombre;
+	    }
+	    
+	}
+	    
 	public Jframereservados() {
 	    this(null);
 	}
@@ -49,7 +75,7 @@ public class Jframereservados extends JFrame {
 		this.gestorBD = new GestorBD();
 		this.gestorBD.inicializarBD();
 		setTitle("Plano de la Discoteca");
-		setSize(800, 700);
+		setSize(1020, 720);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setLayout(new BorderLayout(10, 10));
@@ -72,7 +98,6 @@ public class Jframereservados extends JFrame {
 		JLabel texto = new JLabel("Pista", JLabel.CENTER);
 		texto.setFont(new Font("Arial", Font.BOLD, 22));
 		texto.setForeground(Color.DARK_GRAY);
-		texto.getForeground().darker();
 		texto.setBounds(230, 180, 150, 30);
 		panelpista.add(texto);
 		
@@ -90,11 +115,6 @@ public class Jframereservados extends JFrame {
 		camarero.setVisible(false); //
 		panelpista.add(camarero);
 		
-
-
-		camarero.setVisible(false);
-		panelpista.add(camarero);
-		
 		JButton btnVolver = new JButton("Volver");
 		btnVolver.setBounds(10, 10, 90, 30);
 		btnVolver.addActionListener(e -> dispose());
@@ -108,25 +128,30 @@ public class Jframereservados extends JFrame {
 
 		// mesas derecha
 		for (int i = 1; i < 5; i++) {
-			JButton mesa = crearmesa("Mesa barata" + "" + i, TipoMesa.MESA_NORMAL);
-			mesa.setFont(new Font("Arial", Font.BOLD, 12));
-			mesa.setBorder(BorderFactory.createLineBorder(Color.black, 2));
+			JButton mesa = crearmesa("Reservado " + "" + i, TipoMesa.MESA_NORMAL);
+			
 			panelmesas.add(mesa);
 		}
 		add(panelmesas, BorderLayout.EAST);
 
 		// mesas inf
 		JPanel panelmesasinf = new JPanel(new GridLayout(1, 3, 15, 10));
-		panelmesas.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+		panelmesasinf.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 		panelmesasinf.setPreferredSize(new Dimension(0, 70));
 		for (int i = 1; i < 4; i++) {
-			JButton mesa = crearmesa("Mesa Cara" + "" + i, TipoMesa.MESA_VIP);
+			JButton mesa = crearmesa("Reservado VIP" + "" + i, TipoMesa.MESA_VIP);
 			mesa.setFont(new Font("Arial", Font.BOLD, 12));
 			mesa.setBorder(BorderFactory.createLineBorder(Color.black, 2));
 			panelmesasinf.add(mesa);
 		}
 		add(panelmesasinf, BorderLayout.SOUTH);
 
+		
+		
+		
+		
+		
+		
 	}
 
 	// Panel para los pedidos
@@ -433,9 +458,10 @@ public class Jframereservados extends JFrame {
 
 	                    //confirmación
 	                    SwingUtilities.invokeLater(() -> {
+	                    	String nombrelimpio = botonMesa.getText().replaceAll("<[^>]*>", " ").trim(); // he usado la IA para el html
 	                        JOptionPane.showMessageDialog(
 	                                Jframereservados.this,
-	                                "¡Producto entregado!\n(" + cantidad + "x " + producto + " en " + botonMesa.getText() + ")",
+	                                "¡Producto entregado!\n(" + cantidad + "x " + producto + " en " + nombrelimpio + ")",
 	                                "Entrega",
 	                                JOptionPane.INFORMATION_MESSAGE);
 	                    });
@@ -517,22 +543,54 @@ public class Jframereservados extends JFrame {
 		}
 	}
 
+	
+	
+	
+	
+	private void cambiarEstadoMesa (Datomesa datos, EstadoMesa nuevoestado, String nombrereserva) {
+		datos.estado = nuevoestado;
+		datos.cliente = nombrereserva;
+		datos.boton.setBackground(nuevoestado.getColorEstado().darker());
+		if (nuevoestado == EstadoMesa.OCUPADA) {
+			datos.boton.setText("<html><center>" + datos.nombre + "<br><small>"  + "</small></center></html>"); //html hecho con IA
+		} else {
+			datos.boton.setText(datos.nombre);
+		}
+		
+		
+	} 
 	private JButton crearmesa(String nombre, TipoMesa tipo) {
+		
 		EstadoMesa estado = random.nextBoolean() ? EstadoMesa.LIBRE : EstadoMesa.OCUPADA;
 
 		JButton mesa = new JButton(nombre);
 		mesa.setFont(new Font("Arial", Font.BOLD, 12));
+		mesa.setForeground(Color.WHITE);
 		mesa.setBackground(estado.getColorEstado().darker());
 		mesa.setFocusPainted(false);
 		mesa.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
+		
+		Datomesa datos = new Datomesa(nombre, tipo, estado, mesa);
+		
+		
+		if (datos.estado == EstadoMesa.OCUPADA) {
+			mesa.setText("<html><center>" + nombre + "<br><small>"  + "</small></center></html>"); //Html con ia
+		}
+		
+		listaMesas.add(datos);
+
+		
+		
 		mesa.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				String infocliente = datos.estado == EstadoMesa.OCUPADA ? "\nTitular: " + datos.cliente : "";
 				String mensaje = "Mesa: " + nombre + "\n" + "Tipo: " + tipo.getDescripcion() + "\n" + "Precio: "
-						+ tipo.getPrecioReserva() + "€\n" + "Estado actual: " + estado;
+						+ tipo.getPrecioReserva() + "€\n" + "Estado actual: " + datos.estado ;;
 
-				if (estado == EstadoMesa.OCUPADA) {
+				if (datos.estado == EstadoMesa.OCUPADA) {
 					String[] optexto = { "Hacer Pedido", "Cerrar" };
 
 					int respuesta = JOptionPane.showOptionDialog(null, mensaje, "Información sobre la Mesa",
