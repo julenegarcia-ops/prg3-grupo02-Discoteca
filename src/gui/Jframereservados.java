@@ -24,7 +24,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-
+import jdbc.GestorBD;
 // Imports estimados hechos con IA.
 public class Jframereservados extends JFrame {
 
@@ -36,14 +36,25 @@ public class Jframereservados extends JFrame {
 	private Thread hilocamarero;
 	private JPanel panelpista;
 	private volatile boolean corriendo = false;
+	private GestorBD gestorBD;
+	private JFrameInventario ventanaInventario;
 
+	
 	public Jframereservados() {
-
+	    this(null);
+	}
+	
+	public Jframereservados(JFrameInventario ventanaInventario) {
+		this.ventanaInventario = ventanaInventario;
+		this.gestorBD = new GestorBD();
+		this.gestorBD.inicializarBD();
 		setTitle("Plano de la Discoteca");
 		setSize(800, 700);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setLayout(new BorderLayout(10, 10));
+		
+		
 
 		// Barra
 		panelbarra = new JPanel();
@@ -180,15 +191,39 @@ public class Jframereservados extends JFrame {
 			confirmar.setPreferredSize(new Dimension(0, 38));
 
 			confirmar.addActionListener(new ActionListener() {
-
+				
+				
+				
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					
 					if (productoseleccionado == null) {
 						JOptionPane.showMessageDialog(PanelPedido.this,
 								"Por favor, selecciona primero un producto del menú.",
 								"Falta producto", JOptionPane.WARNING_MESSAGE);
 						return;
 					}
+					
+					String nombreclean = productoseleccionado.split(" - ")[0].trim();
+					int canti = (int) cantidad.getValue();
+
+					boolean existencias = gestorBD.conectarstockynombre(nombreclean, canti);
+
+					if (!existencias) {
+					    JOptionPane.showMessageDialog(
+					        PanelPedido.this,
+					        "No hay suficiente stock en el inventario de " + nombreclean,
+					        "Sin stock",
+					        JOptionPane.ERROR_MESSAGE
+					    );
+					    return;
+					}
+
+					if (ventanaInventario != null) {
+					    ventanaInventario.recargarDesdeBD();
+					}
+					
+					
 					
 					camarero.setVisible(true);
 					panelbarra.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 15));
