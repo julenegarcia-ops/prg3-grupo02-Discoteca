@@ -2,6 +2,8 @@ package gui;
 
 
 import java.awt.GridLayout;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
@@ -65,6 +67,12 @@ public class JFrameInventario extends JFrame{
 	private JButton btnActualizarStock;
 	
 	private GestorBD gestorBD;
+	
+	// para que escogen una categoria y se filtre por ello, puedes filytrar por categoria o poe estado
+	private JTextField txtBuscar;
+	private JComboBox<String> comboFiltroEstado;
+	private JComboBox<String> comboFiltroCategoria;
+	
 	
 	//los valores que van dentro de las tarjetas de informacion
 	private JLabel lblnumproductos;
@@ -565,10 +573,44 @@ public class JFrameInventario extends JFrame{
 		//para que se le añadan los datos a las tarjetas
 		actualizarResumen();
 		
+		// creo la barra y lee lo que se escribe
+		txtBuscar = new JTextField(20);
+		//las opciones de cada filtro
+		comboFiltroCategoria = new JComboBox<>(new String[] {"Todas", "Refrescos", "Energéticas", "Cervezas", "Licores", "Otros"});
+		comboFiltroEstado = new JComboBox<>(new String[] {"Todos", "OK", "Bajo", "Agotado"});
+		
+		txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {   // se ha escrito algo
+				filtrarProductos();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {   // se ha borrado algo
+				filtrarProductos();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) { } // no se usa en un JTextField
+		});
+	
+		comboFiltroCategoria.addActionListener(e -> filtrarProductos());
+		comboFiltroEstado.addActionListener(e -> filtrarProductos());
+		
+		JPanel panelfiltros = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		panelfiltros.add(new JLabel("Buscar:"));
+		panelfiltros.add(txtBuscar);
+		panelfiltros.add(new JLabel("Categoria:"));
+		panelfiltros.add(comboFiltroCategoria);
+		panelfiltros.add(new JLabel("Estado:"));
+		panelfiltros.add(comboFiltroEstado);
+		
 		//creo u  panel para poner el pnel superior con el de la tarjetas y luego añadirlo al principal
 		JPanel panelarriba = new JPanel(new BorderLayout(0,12));
 		panelarriba.add(panelSuperior, BorderLayout.NORTH);
 		panelarriba.add(panelTarjetas, BorderLayout.CENTER);
+		
+		panelarriba.add(panelfiltros, BorderLayout.SOUTH);
 		
 		principal.add(panelarriba, BorderLayout.NORTH);
 
@@ -820,6 +862,51 @@ public class JFrameInventario extends JFrame{
 		scroll.setPreferredSize(new Dimension(450, 300));
 
 		JOptionPane.showMessageDialog(this, scroll, "Historial de movimientos", JOptionPane.PLAIN_MESSAGE);
+	}
+	
+	//vacia la tabla y los que cumplen lo que pone en el filtro se añaden
+	private void filtrarProductos() {
+		String texto = txtBuscar.getText().toLowerCase();
+		String categoriaElegida = (String) comboFiltroCategoria.getSelectedItem();
+		String estadoelegido = (String) comboFiltroEstado.getSelectedItem();
+		
+		modeloDatosProductos.setRowCount(0);
+		
+		for (Producto p : productos) {
+			String estado = textoEstado(p.getStock(), p.getStockmin());
+			
+			boolean coincideNombre = p.getNombre().toLowerCase().contains(texto);
+			boolean coincideCategoria = categoriaElegida.equals("Todas") || p.getCategoria().equals(categoriaElegida);
+			boolean coincideEstado = estadoelegido.equals("Todos") || estado.equals(estadoelegido);
+			
+			if (coincideNombre && coincideCategoria && coincideEstado) {
+				Vector<Object> fila = new Vector<>();
+				fila.add(p.getId());
+				fila.add(p.getNombre());
+				fila.add(p.getCategoria());
+				fila.add(p.getPrecio());
+				fila.add(p.getStock());
+				fila.add(p.getStockmin());
+				fila.add(null);
+				modeloDatosProductos.addRow(fila);
+			}
+		}
+		if (!texto.isEmpty() || !categoriaElegida.equals("Todas") || !estadoelegido.equals("Todos")) {
+			// Hay filtro: desactivo los botones que cambian el stock
+			btnPedido.setEnabled(false);
+			btnProducto.setEnabled(false);
+			btnIniciar.setEnabled(false);
+		} else {
+			// No hay filtro: los vuelvo a activar
+			btnPedido.setEnabled(true);
+			btnProducto.setEnabled(true);
+
+			// Iniciar solo si no hay ya una simulación en marcha
+			if (hiloConsumo == null || !hiloConsumo.isAlive()) {
+				btnIniciar.setEnabled(true);
+			}
+		}
+		btnActualizarStock.setEnabled(false);
 	}
 	
 	private static String textoEstado(int stock, int stockmin) {
