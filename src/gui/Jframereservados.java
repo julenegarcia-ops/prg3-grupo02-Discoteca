@@ -27,7 +27,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
-
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
 import jdbc.GestorBD;
 // Imports estimados hechos con IA.
 public class Jframereservados extends JFrame {
@@ -147,12 +148,83 @@ public class Jframereservados extends JFrame {
 		add(panelmesasinf, BorderLayout.SOUTH);
 
 		
+		JPanel panelgestion = new JPanel(new BorderLayout());
+		panelgestion.setPreferredSize(new Dimension(240, 0));
+		panelgestion.setBackground(new Color(240, 242, 245));
+		panelgestion.setBorder(BorderFactory.createTitledBorder(
+		        BorderFactory.createLineBorder(Color.BLACK, 2), "Gestión de Mesas",
+		        TitledBorder.CENTER, TitledBorder.TOP));
+		
+	add(panelgestion, BorderLayout.WEST);
 		
 		
+	JPanel contenedorgestion = new JPanel(new GridLayout(0, 1, 0, 10));
+	contenedorgestion.setOpaque(false);
+
+	JLabel labelselecmesa = new JLabel("Seleccionar mesa:");
+	labelselecmesa.setFont(new Font("Arial", Font.BOLD, 12));
+	JComboBox<Datomesa> combomesas = new JComboBox<>(listaMesas.toArray(new Datomesa[0]));
+
+	JLabel nombrereserva = new JLabel("Nombre de la reserva:");
+	nombrereserva.setFont(new Font("Arial", Font.BOLD, 12));
+	JTextField nombre = new JTextField();
+
+	JButton nuevareserva = new JButton("Añadir Reserva");
+	nuevareserva.setBackground(new Color(34, 139, 34));
+	nuevareserva.setForeground(Color.WHITE);
+	nuevareserva.setFont(new Font("Arial", Font.BOLD, 12));
+	nuevareserva.setFocusPainted(false);
+
+	nuevareserva.addActionListener(e -> {
+		Datomesa seleccionada = (Datomesa) combomesas.getSelectedItem();
+		if (seleccionada == null) {
+			return;
+		} 
+
+		if (seleccionada.estado == EstadoMesa.OCUPADA) {
+			JOptionPane.showMessageDialog(this, "Esa mesa ya está ocupada.", "Mesa ocupada", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		String titular = nombre.getText().trim();
+		if (titular.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Introduce el nombre del titular.", "Falta nombre", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		cambioestadomesa(seleccionada, EstadoMesa.OCUPADA, titular);
+		nombre.setText("");
+	});
+
+	JButton libre = new JButton("Marcar como Libre");
+	libre.setBackground(new Color(180, 45, 45));
+	libre.setForeground(Color.WHITE);
+	libre.setFont(new Font("Arial", Font.BOLD, 12));
+	libre.setFocusPainted(false);
+
+	libre.addActionListener(e -> {
+		Datomesa seleccionada = (Datomesa) combomesas.getSelectedItem();
+		if (seleccionada == null) return;
+
+		if (seleccionada.estado == EstadoMesa.LIBRE) {
+			JOptionPane.showMessageDialog(this, "Esa mesa ya está libre.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+
+		cambioestadomesa(seleccionada, EstadoMesa.LIBRE, "");
+	});
+
+	contenedorgestion.add(labelselecmesa);
+	contenedorgestion.add(combomesas);
+	contenedorgestion.add(nombrereserva);
+	contenedorgestion.add(nombre);
+	contenedorgestion.add(nuevareserva);
+	contenedorgestion.add(libre);
+
+	panelgestion.add(contenedorgestion, BorderLayout.NORTH);
+}
 		
-		
-		
-	}
+	
 
 	// Panel para los pedidos
 
@@ -193,6 +265,9 @@ public class Jframereservados extends JFrame {
 			panelinf.setBorder(BorderFactory.createEmptyBorder(5, 15, 15, 15));
 
 
+		
+			
+			
 			//resumen
 			JPanel resumen = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
 			labelseleccionado = new JLabel("Aún no has seleccionado nada");
@@ -547,7 +622,7 @@ public class Jframereservados extends JFrame {
 	
 	
 	
-	private void cambiarEstadoMesa (Datomesa datos, EstadoMesa nuevoestado, String nombrereserva) {
+	private void cambioestadomesa (Datomesa datos, EstadoMesa nuevoestado, String nombrereserva) {
 		datos.estado = nuevoestado;
 		datos.cliente = nombrereserva;
 		datos.boton.setBackground(nuevoestado.getColorEstado().darker());
@@ -588,7 +663,7 @@ public class Jframereservados extends JFrame {
 				
 				String infocliente = datos.estado == EstadoMesa.OCUPADA ? "\nTitular: " + datos.cliente : "";
 				String mensaje = "Mesa: " + nombre + "\n" + "Tipo: " + tipo.getDescripcion() + "\n" + "Precio: "
-						+ tipo.getPrecioReserva() + "€\n" + "Estado actual: " + datos.estado ;;
+						+ tipo.getPrecioReserva() + "€\n" + "Estado actual: " + datos.estado + infocliente ;
 
 				if (datos.estado == EstadoMesa.OCUPADA) {
 					String[] optexto = { "Hacer Pedido", "Cerrar" };
