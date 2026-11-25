@@ -6,6 +6,8 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -76,6 +79,8 @@ public class JFrameInventario extends JFrame{
 	//Boton para realizar el pedido manualmente y el historial de en cada venta que producto se ha restado del inventario
 	private JButton btnPedido;
 	private JButton btnHistorial;
+	
+	private List<String>historial = new ArrayList();
 	
 	private JButton btnProducto; //para añadir un nuevo producto q no existe
 
@@ -309,8 +314,12 @@ public class JFrameInventario extends JFrame{
 		            }
 
 		            // Actualizo el objeto Producto
+		            // se guarda antes de que se ajuste el stockanterior y luego compararlo como nuevo
+		            int stockanterior = productoSeleccionado.getStock();
 		            productoSeleccionado.setStock(nuevoStock);
 		            gestorBD.actualizarstock(productoSeleccionado.getId(), nuevoStock);
+		            registrar("Ajuste: " + productoSeleccionado.getNombre() + " " + stockanterior + " -> " + nuevoStock);
+		            
 
 		            // Actualizo el modelo de la JTable
 		            tablaProductos.setValueAt(nuevoStock, fila, 4);
@@ -404,9 +413,7 @@ public class JFrameInventario extends JFrame{
 		btnPedido.setBackground(MORADO);
 		btnPedido.setForeground(Color.WHITE);
 		
-		btnHistorial.addActionListener(e -> {
-			JOptionPane.showMessageDialog(this, "Falta de hacer");
-		});
+		btnHistorial.addActionListener(e -> mostrarHistorial());
 		
 		btnPedido.addActionListener(e -> {
 			
@@ -468,6 +475,7 @@ public class JFrameInventario extends JFrame{
 					Producto p = productos.get(i);
 					p.setStock(p.getStock() + cantidad);
 					gestorBD.actualizarstock(p.getId(), p.getStock());
+					registrar("Pedido: +" + cantidad + " " + p.getNombre());
 					modeloDatosProductos.setValueAt(p.getStock(), i, 4); // columna STOCK
 
 					totalunidades += cantidad;
@@ -756,6 +764,7 @@ public class JFrameInventario extends JFrame{
 		}
 
 		recargarDesdeBD();
+		registrar("Nuevo producto: " + nombre);
 		
 		actualizarResumen();
 		JOptionPane.showMessageDialog(this, "Producto añadido correctamente.");
@@ -779,6 +788,38 @@ public class JFrameInventario extends JFrame{
 			this.modeloDatosProductos.addRow(fila);
 		}
 		actualizarResumen();
+	}
+	
+	// para registrar todos los movimientos que se hacen en el inventario, tanto ajustar ek stock, añadir, vender...
+	//metodo con IA
+	private void registrar(String texto) {
+	
+		String hora = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+		historial.add(hora + " - " + texto);
+	}
+	//fin IA
+	
+	// crea la ventana historial
+	
+	private void mostrarHistorial() {
+		if (historial.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Todavía no hay movimientos.");
+			return;
+		}
+
+		// Recorro la lista al revés para que lo último salga arriba
+		String texto = "";
+		for (int i = historial.size() - 1; i >= 0; i--) {
+			texto += historial.get(i) + "\n";
+		}
+
+		JTextArea area = new JTextArea(texto);
+		area.setEditable(false); // solo para leer
+
+		JScrollPane scroll = new JScrollPane(area);
+		scroll.setPreferredSize(new Dimension(450, 300));
+
+		JOptionPane.showMessageDialog(this, scroll, "Historial de movimientos", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	private static String textoEstado(int stock, int stockmin) {
@@ -1105,6 +1146,8 @@ g.fillRect(x, y, relleno, alto);
 						// Descuento una unidad
 						p.setStock(p.getStock() - 1);
 						gestorBD.actualizarstock(p.getId(), p.getStock());
+						//registrar la venta y llama al metodo registrar
+						registrar("Venta: " + p.getNombre() + " (quedan " +  p.getStock() + ")");
 
 						// Actualizo la tabla
 						modeloDatosProductos.setValueAt(
